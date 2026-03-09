@@ -1,6 +1,6 @@
 ---
-name: review-python
-description: Python code review for academic research. Checks quality, reproducibility, convention compliance, and test coverage. Use after writing or modifying Python scripts or modules.
+name: review-code
+description: Python code review for academic research. Checks quality, reproducibility, convention compliance, and test coverage. Use after writing or modifying Python scripts or modules in any tier (core, exploration, archive).
 disable-model-invocation: false
 argument-hint: "[file path or 'all' for changed .py files]"
 allowed-tools: ["Read", "Grep", "Glob", "Write"]
@@ -19,7 +19,7 @@ Standards: production-grade data pipeline + published replication package rigor.
 ## Steps
 
 1. **Read the target file(s)** end-to-end.
-2. **Classify each file:** module (`code/src/mypackage/core/`), script (`code/scripts/core/`), or exploration.
+2. **Classify each file:** module (`code/src/mypackage/{tier}/`), script (`code/scripts/{tier}/`), or test (`code/tests/`). The tier (core / exploration / archive) determines the score threshold, not which checks apply.
 3. **Check every category** below systematically.
 4. **Score** using the rubric from `standalone-quality.md` (auto-loaded for `.py` files).
 5. **Save the report** — see Output Location.
@@ -29,7 +29,9 @@ Standards: production-grade data pipeline + published replication package rigor.
 
 ## Review Categories
 
-### 1. Module Structure (src/core/ only)
+### 1. Module Structure (all tiers)
+
+Applies to all files in `code/src/mypackage/` — whether `core/`, `exploration/{variant-name}/`, or `archive/{variant-name}/`.
 
 - Pure logic — no file I/O (open, read, write, pathlib operations)
 - Functions take data in, return data out
@@ -37,16 +39,19 @@ Standards: production-grade data pipeline + published replication package rigor.
 - Clean imports at top of file
 - `__all__` defined if module exports specific names
 
-**Critical flag:** Any file I/O in src/core/ (-30 deduction).
+**Critical flag:** Any file I/O in src/ (-30 deduction).
 
-### 2. Script Structure (scripts/core/ only)
+### 2. Script Structure (all tiers)
 
-- Numbered prefix (`01_clean.py`, `02_merge.py`, etc.)
+Applies to all files in `code/scripts/` — whether `core/` (numbered scripts), `exploration/{variant-name}/`, or `archive/{variant-name}/`.
+
+- Core scripts: numbered prefix (`01_clean.py`, `02_merge.py`, etc.)
+- Exploration/archive scripts: named subfolder (`code/scripts/{tier}/{variant-name}/`)
 - Clear sections: imports, setup, main logic, output
 - Imports from `src/mypackage/` — not copy-pasted logic
-- Script can be run standalone: `python3 code/scripts/core/NN_name.py`
+- Script can be run standalone
 
-**Flag:** Missing NN_ prefix, copy-pasted logic from src/.
+**Flag:** Missing NN_ prefix (core), copy-pasted logic from src/.
 
 ### 3. Reproducibility
 
@@ -81,8 +86,8 @@ Standards: production-grade data pipeline + published replication package rigor.
 - `data/raw/` is NEVER modified
 - Data flows: raw/ -> scripts -> intermediate/ -> scripts -> processed/ -> scripts -> output/
 - Intermediate data written to `data/intermediate/`
-- Processed data written to `data/processed/`
-- Output files written to `output/core/` or `output/exploration/`
+- Processed data written to `data/processed/{variant-name}/`
+- Output files written to `output/{tier}/tables/{variant-name}/` and `output/{tier}/figures/{variant-name}/`
 
 **Critical flag:** Any modification to data/raw/ (-30).
 
@@ -102,6 +107,7 @@ Standards: production-grade data pipeline + published replication package rigor.
 - No hardcoded absolute paths (`/Users/...`, `C:\...`)
 - No relative paths with `..` that break when cwd changes
 - `config.py` is the single source of truth for all paths
+- Variant-specific paths follow the pattern: `TABLES_{VARIANT_NAME}`, `FIGURES_{VARIANT_NAME}`, `PROCESSED_{VARIANT_NAME}`
 
 ### 9. Error Handling
 
@@ -112,7 +118,18 @@ Standards: production-grade data pipeline + published replication package rigor.
 
 **Flag:** Silent data loss, unguarded division, cryptic error messages.
 
-### 10. Professional Polish
+### 10. Output Format Conventions
+
+Scripts that produce outputs should save in paired formats:
+
+- **Tables:** `.tex` (directly importable with `\input{}` in LaTeX) + `.csv` (for quick inspection)
+- **Figures:** `.pdf` (for LaTeX inclusion) + `.png` (for quick viewing), saved with `dpi=300, bbox_inches='tight'`
+- Output directories created with `DIR.mkdir(parents=True, exist_ok=True)` before saving
+- Figures closed after saving: `plt.close(fig)`
+
+**Flag:** Missing format pair (-5), missing `mkdir` before save (-3).
+
+### 11. Professional Polish
 
 - PEP 8 compliant (consistent indentation, spacing, line length)
 - No dead code (commented-out blocks, unused imports)
@@ -125,11 +142,11 @@ Standards: production-grade data pipeline + published replication package rigor.
 
 Start at 100, apply deductions per `standalone-quality.md`. Quick reference:
 
-**Module rubric** (threshold 80):
+**Module rubric** (threshold 80 for core, 60 for exploration/archive):
 - File I/O in src/ (-30), hardcoded paths (-20), missing tests (-10), naming (-3), type hints (-2)
 
-**Script rubric** (threshold 80):
-- Modifies raw/ (-30), hardcoded paths (-20), missing seed (-10), no prefix (-3)
+**Script rubric** (threshold 80 for core, 60 for exploration/archive):
+- Modifies raw/ (-30), hardcoded paths (-20), missing seed (-10), no prefix (-3), missing output format pair (-5)
 
 **Exploration rubric** (threshold 60):
 - Syntax error (-100), modifies raw/ (-30), doesn't run (-15), missing seed (-10), hardcoded paths (-5)
@@ -153,7 +170,7 @@ ISSUES:
 - ID: PY001
   FILE: [path]
   LINE: [N]
-  CATEGORY: STRUCTURE | REPRODUCIBILITY | FUNCTIONS | DOMAIN | DATA | TESTS | PATHS | ERRORS | POLISH
+  CATEGORY: STRUCTURE | REPRODUCIBILITY | FUNCTIONS | DOMAIN | DATA | TESTS | PATHS | ERRORS | OUTPUT_FORMAT | POLISH
   SEVERITY: CRITICAL | MAJOR | MINOR
   DEDUCTION: [N]
   CURRENT: "[code snippet]"
@@ -169,19 +186,16 @@ ISSUES:
 
 ## Output Location
 
-Determine the save path:
-1. Check if recent context is inside `exploration/[name]/`.
-2. If YES: save to `docs/exploration/[name]/python_review_[filename]_[date].md`.
-3. If NO: save to `docs/quality_reports/reviews/[filename]_python_review.md`.
-4. Create the directory if it does not exist.
+Save to `docs/quality_reports/reviews/{tier}/review-code-{variant-name}.md`. Create the directory if it does not exist. The report replaces the previous one on re-run — no date suffix.
 
 ---
 
 ## Important
 
 - **NEVER edit source files.** Only produce the report.
+- **Verify every claim you write.** For every number, line reference, or code snippet in the report, confirm it matches the actual source file. Do NOT trust your own reading — treat each claim as something to double-check before writing it down.
 - **Be specific.** Include line numbers and exact code snippets for every issue.
 - **Be actionable.** Every issue must have a concrete proposed fix.
 - **Prioritize correctness.** Domain bugs and data handling matter more than style.
-- **Apply the RIGHT rubric.** Module vs script vs exploration — using the wrong one produces wrong scores.
+- **Apply the RIGHT rubric.** The tier determines the threshold (80 for core, 60 for exploration/archive). The structural checks (pure logic in src/, I/O in scripts/) apply equally to all tiers.
 - **Handle empty stubs gracefully.** If the target file is empty, report "File is empty — nothing to review."

@@ -8,7 +8,7 @@ description: >-
   number and claim in the summary as something to verify against source files.
   Distinct from /review-manuscript (qualitative academic review) and
   /review-details (grammar/typos). Do NOT use for writing summaries (use
-  /write-summary) or reviewing code (use /review-python).
+  /write-summary) or reviewing code (use /review-code).
 disable-model-invocation: false
 argument-hint: "[summary to review, e.g. 'review the {variant-name} summary']"
 allowed-tools: ["Read", "Grep", "Glob", "Write", "Bash"]
@@ -16,7 +16,7 @@ allowed-tools: ["Read", "Grep", "Glob", "Write", "Bash"]
 
 # Review Summary
 
-Fact-check a summary document against the actual pipeline outputs. Treat the summary as a set of claims to verify — do NOT trust it.
+Fact-check a summary document against the actual pipeline outputs. Treat the summary as a set of claims to verify — do NOT trust it. For every number you cite in the report, verify it matches the source data. Do NOT trust your own reading — treat each value as a claim to double-check before writing it down.
 
 **Input:** `$ARGUMENTS` — what to review (e.g., "fact-check the {variant-name} summary", "verify the {variant-name} draft", "check numbers in the {variant-name} report").
 
@@ -204,7 +204,7 @@ Scoring: 5 = all clean, 4 = orphaned outputs only, 3 = minor issues (rounding, 1
 
 ## Step 11: Save
 
-Save the report to `draft/{tier}/{variant-name}/review-{variant-name}.md`.
+Save the report to `docs/quality_reports/reviews/{tier}/review-summary-{variant-name}.md`. Create the directory if it does not exist. The report replaces the previous one on re-run — no date suffix.
 
 ---
 

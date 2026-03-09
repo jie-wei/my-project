@@ -21,7 +21,7 @@ Run an end-to-end data analysis in Python: load, explore, analyze, and produce p
 - **All paths from `config.py`** -- import from `code/src/mypackage/config.py`, never hardcode.
 - **Never modify `data/raw/`** -- it is sacred.
 - **Save all outputs** (figures, tables, processed data) to appropriate `output/` directories.
-- **Run `/review-python`** on generated code before presenting results.
+- **Run `/review-code`** on generated code before presenting results.
 
 ---
 
@@ -74,7 +74,7 @@ Based on the research question:
 1. Save processed data to `data/intermediate/` or `data/processed/` as appropriate.
 2. Save all figures and tables to `output/`.
 3. Create output directories as needed with `os.makedirs(..., exist_ok=True)`.
-4. Run `/review-python` on generated code:
+4. Run `/review-code` on generated code:
    "Review the script at code/scripts/[tier]/[script_name].py"
 
 5. Address any Critical or High issues from the review.
