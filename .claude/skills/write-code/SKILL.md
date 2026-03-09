@@ -109,8 +109,9 @@ Key conventions:
 
 1. **Run the code**: execute scripts, check outputs are created at expected paths
 2. **Run tests**: `cd code && uv run pytest tests/test_{variant-name}.py -v`
-3. **Run `/review-python`** on all new/modified files
-4. **Check quality gate**: 80/100 for core, 60/100 for exploration
+3. **Run `/review-code`** on all new/modified files — report saves to `docs/quality_reports/reviews/{tier}/review-code-{variant-name}.md`
+4. **Read the review report**: if issues are found, fix them and re-run `/review-code` until the report is clean
+5. **Check quality gate**: 80/100 for core, 60/100 for exploration
 
 ---
 

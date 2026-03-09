@@ -33,8 +33,8 @@ Skills are in `.claude/skills/`. Use them for review steps.
 
 | File Pattern             | Step 2 (VERIFY) | Step 3 (REVIEW)                            |
 | ------------------------ | --------------- | ------------------------------------------ |
-| `code/src/**/*.py`     | verifier        | `/review-python`                         |
-| `code/scripts/**/*.py` | verifier        | `/review-python`                         |
+| `code/src/**/*.py`     | verifier        | `/review-code`                         |
+| `code/scripts/**/*.py` | verifier        | `/review-code`                         |
 | `paper/*.tex`          | verifier        | `/review-manuscript and /review-details` |
 | `draft/**/*.tex`       | verifier        | `/review-summary`                        |
 

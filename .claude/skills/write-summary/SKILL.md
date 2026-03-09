@@ -159,6 +159,12 @@ Where appropriate, create hand-coded summary tables that synthesize across multi
 
 ---
 
+## Step 10: Fact-Check
+
+Run `/review-summary` on the completed document — report saves to `docs/quality_reports/reviews/{tier}/review-summary-{variant-name}.md`. Read the report: if discrepancies are found, fix them in the summary, recompile, and re-run `/review-summary` until the report is clean.
+
+---
+
 ## Checklist
 
 - [ ] All output files referenced (no orphaned tables/figures)
@@ -173,6 +179,7 @@ Where appropriate, create hand-coded summary tables that synthesize across multi
 - [ ] Introduction written last, reflects actual findings and conjectures
 - [ ] Document compiles without errors
 - [ ] Auxiliary files cleaned up
+- [ ] `/review-summary` passes (all numbers verified, no missing figures)
 
 ---
 
