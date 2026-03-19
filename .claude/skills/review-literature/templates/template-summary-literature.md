@@ -12,10 +12,17 @@
 ### [Author (Year)](URL) — Short Title `[UNSUMMARIZED]` `[UNVERIFIED]`
 
 - **Publication:** *Journal Name*, vol. X(Y), pp. Z-Z
-- **Main contribution:** [1-2 sentences on what the paper does]
+- **Main contribution:**
+  - [Point 1 — what the paper does]
+  - [Point 2 — key mechanism or insight]
+  - [Point 3 — specific result with theorem/proposition number, if applicable]
 - **Method:** [Research design / data / theoretical framework]
-- **Key finding:** [Main result, with effect size if empirical]
-- **Relevance to our paper:** [Specific comparison — which of our results does this relate to? Is it a predecessor, complement, competitor, or something we extend? Name our theorem/proposition numbers.]
+- **Key finding:**
+  - [Finding 1 — with theorem/proposition number and direction of effect]
+  - [Finding 2 — if applicable]
+- **Relevance to our paper:**
+  - [Connection 1 — which of our results this relates to]
+  - [Connection 2 — how it differs from or complements our approach]
 
 [Repeat for each paper, ordered by relevance to our work. Typically 5-20 papers.]
 
@@ -24,9 +31,13 @@
 <!--                                                                                -->
 <!-- - **Summary:** [Full summary](relative/path/to/summary-year-author.md)        -->
 <!-- - **Publication:** *Journal Name*, vol. X(Y), pp. Z-Z                         -->
-<!-- - **Main contribution:** [Updated with deep understanding from summary]        -->
-<!-- - **Key finding:** [Updated — grounded in actual reading]                      -->
-<!-- - **Relevance to our paper:** [Updated — specific, names our results]          -->
+<!-- - **Main contribution:**                                                       -->
+<!--   - [Updated — grounded in actual paper content]                              -->
+<!--   - [With specific theorem/proposition numbers]                               -->
+<!-- - **Key finding:**                                                             -->
+<!--   - [Updated — specific, with result numbers]                                 -->
+<!-- - **Relevance to our paper:**                                                  -->
+<!--   - [Updated — names our specific results, precise comparison]                -->
 
 ## Thematic Organization
 

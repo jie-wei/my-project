@@ -58,24 +58,34 @@ Parse `$ARGUMENTS`:
 
 ## Output Format
 
-Read the bundled template at `templates/summary-literature.md` (relative to this skill's directory) as the starting structure. The key sections are:
+Read the bundled template at `templates/template-summary-literature.md` (relative to this skill's directory) as the starting structure. The key sections are:
 
 ### Summary
 2-3 paragraph overview positioning the state of the literature relative to our paper's contribution.
 
 ### Key Papers
 
-For each paper, use this format:
+For each paper, use this format. Use bullet points and sub-bullets within each field to separate distinct points — a dense paragraph mixing multiple ideas is hard to scan. Each bullet should make one claim or state one fact.
 
 ```markdown
 ### [Author (Year)](URL) — Short Title `[UNSUMMARIZED]` `[UNVERIFIED]`
 
 - **Publication:** *Journal Name*, vol. X(Y), pp. Z
-- **Main contribution:** [1-2 sentences]
+- **Main contribution:**
+  - [Point 1 — what the paper does]
+  - [Point 2 — the key mechanism or insight]
+  - [Point 3 — if needed, a specific result with theorem/proposition number]
 - **Method:** [Research design / data]
-- **Key finding:** [Result with effect size if available]
-- **Relevance to our paper:** [How it relates to our specific results — compare, contrast, complement]
+- **Key finding:**
+  - [Finding 1 — with theorem/proposition number and direction of effect]
+  - [Finding 2 — if applicable]
+- **Relevance to our paper:**
+  - [Connection 1 — which of our results this relates to]
+  - [Connection 2 — how it differs from or complements our approach]
+  - [Connection 3 — specific comparison (e.g., "their X requires Y; ours does not")]
 ```
+
+When a field has only one point, a single line is fine — no need to force bullets. Use sub-bullets when a point has multiple aspects (e.g., a finding that differs across cases).
 
 ### Tags
 
@@ -147,10 +157,16 @@ The idea: initial entries are written from abstracts and LLM memory (shallow). A
 
 - **Summary:** [Full summary](relative/path/to/summary-year-author.md)
 - **Publication:** *Journal Name*, vol. X(Y), pp. Z
-- **Main contribution:** [Updated with deep understanding]
+- **Main contribution:**
+  - [Updated point 1 — grounded in actual paper content]
+  - [Updated point 2 — with specific theorem/proposition numbers]
 - **Method:** [Updated if needed]
-- **Key finding:** [Updated — specific, grounded in actual reading]
-- **Relevance to our paper:** [Updated — names specific results, precise comparison]
+- **Key finding:**
+  - [Updated finding 1 — specific, with result numbers]
+  - [Updated finding 2 — if applicable]
+- **Relevance to our paper:**
+  - [Updated connection 1 — names our specific results]
+  - [Updated connection 2 — precise comparison grounded in both papers]
 ```
 
 Note: `[UNSUMMARIZED]` is gone, replaced by the clickable Summary link. `[UNVERIFIED]` stays until citation details are independently confirmed.
