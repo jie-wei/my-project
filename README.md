@@ -60,11 +60,11 @@ my-project/
 │       ├── tables/
 │       └── figures/
 │
-├── draft/
-│   └── {tier}/{variant-name}/       # Summary documents (.tex) + review reports
-│
 ├── paper/
-│   ├── main.tex                     # Manuscript
+│   ├── main.tex                     # Preamble + \subfile{...} chain
+│   ├── sections/                    # Section subfiles (01-introduction.tex, …)
+│   ├── appendices/                  # Appendix subfiles (A-proofs.tex, …)
+│   ├── .latexmkrc                   # latexmk config (aux dir, cleanup)
 │   └── references.bib               # Bibliography
 │
 ├── .claude/
@@ -271,22 +271,18 @@ Hooks fire automatically throughout a session to maintain continuity:
 SESSION START
     │
     ├─ reminder-log creates session log stub
-    ├─ compact-post restores state (if resuming after compression)
     │
     ▼
 DURING WORK (hooks fire on every tool use)
     │
     ├─ reminder-verify ─── after .py/.tex edit → "run/compile to verify"
     ├─ files-protection ── blocks edits to references.bib, settings.json
-    ├─ latex-cleanup ───── after LaTeX compilation → deletes .aux/.log/.bbl
     ├─ reminder-log ────── blocks if 15+ responses without session log update
     │
     ▼
 APPROACHING CONTEXT LIMIT
     │
-    ├─ compact-pre saves: session log path, active plan, open questions
     ├─ auto-compression happens
-    ├─ compact-post restores saved state
     └─ Resume: read plan + git log + state current task
 ```
 
@@ -299,7 +295,8 @@ APPROACHING CONTEXT LIMIT
 | `workflow-exploration.md` | Exploration fast-track, promotion, archiving |
 | `protocol-orchestrator.md` | Post-plan execution loop, file-type routing to skills |
 | `protocol-verification.md` | How to verify each file type |
-| `standalone-conventions.md` | Code organization, data flow, three-tier structure |
+| `standalone-conventions.md` | Code organization, data flow, three-tier structure, math-in-chat |
+| `standalone-latex-compile.md` | LaTeX compile workflow (latexmk modes, subfiles, aux cleanup, log diagnostics) |
 | `standalone-quality.md` | Scoring rubrics by file type |
 | `standalone-log-session.md` | When to update session logs |
 | `standalone-pdf.md` | Safe PDF reading workflow (chunked, size-checked) |
@@ -310,9 +307,6 @@ APPROACHING CONTEXT LIMIT
 | Hook | Trigger | Action |
 |------|---------|--------|
 | `reminder-verify.py` | PostToolUse (Write/Edit) | Reminds to run/compile .py/.tex |
-| `latex-cleanup.py` | PostToolUse (Bash) | Deletes .aux/.log/.bbl after compilation |
 | `reminder-log.py` | Stop | Blocks if 15+ responses without log update |
-| `compact-pre.py` | PreCompact | Saves plan state before compression |
-| `compact-post.py` | SessionStart (compact) | Restores state after compression |
 | `files-protection.py` | PreToolUse (Edit/Write) | Blocks edits to references.bib, settings.json |
 | `reminder-notify.py` | Notification | Desktop notifications |
