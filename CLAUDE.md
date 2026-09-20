@@ -15,5 +15,5 @@
 
 ## LaTeX
 
-- **Read `.claude/rules/standalone-latex-compile.md` before running any LaTeX command.** It covers the two compile modes (full paper vs single section), the `cd paper/` requirement, the subfiles structure, and how to read `.build/*.log` on failure.
+- **Read `.claude/rules/standalone-latex-compile.md` before running any LaTeX command.** It covers full-paper and standalone subfile builds, supported working directories, preserved cross-reference labels, and how to read `.build/*.log` on failure.
 - Recompile after every edit to a `.tex` or `.bib` file. Don't wait to be asked.

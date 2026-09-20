@@ -1,0 +1,205 @@
+% Math/Theory Summary Template (Mode B)
+% For pure math explorations without data pipelines.
+% Goal: self-contained document that a reader with fresh eyes can follow.
+%
+% Architecture (house style — see workflow-theory.md "House style" for the whys):
+%   - Setup holds PRIMITIVES ONLY (bulleted) + the maintained assumption.
+%     Every other object is defined at the top of the section that first uses it.
+%   - Each results section: definitions (first use) -> motivation prose ->
+%     theorem with FULL inline hypotheses -> strategy paragraph (per-lemma
+%     roles) -> assembly proof (forward-citing lemmas) -> shared inputs as
+%     numbered displays -> lemmas with bulleted proofs.
+%   - One point per line: proofs are itemize/enumerate, one move per bullet.
+%   - Key identities as align* chains with && justifications per line.
+%   - Explicit summation bounds everywhere; argument-explicit functions in
+%     statements; registered notation in statements, raw algebra in proofs.
+%   - \clearpage before each section after the first; figures non-floating,
+%     never alone on a page.
+
+\documentclass[12pt]{article}
+
+% --- Packages ---
+\usepackage{lmodern}
+\usepackage[T1]{fontenc}
+\usepackage{amsmath,amssymb,amsfonts,mathtools,amsthm}
+\usepackage{booktabs}
+\usepackage{hyperref}
+\usepackage{xcolor}
+\usepackage{enumitem}
+\setlist{noitemsep, topsep=2pt}
+\usepackage{setspace}
+\usepackage{tikz}   % figures: draw inline, non-floating
+\usepackage{float}
+
+% --- Page Layout ---
+\usepackage[margin=1in]{geometry}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{0.55em}
+
+% --- Section Formatting ---
+\usepackage{titlesec}
+\titleformat{\section}{\normalfont\scshape\centering}{\thesection.}{0.5em}{}
+\titleformat{\subsection}{\normalfont\bfseries}{\thesubsection.}{0.5em}{}
+
+% --- Hyperlinks ---
+\hypersetup{
+  colorlinks   = true,
+  urlcolor     = blue,
+  linkcolor    = blue,
+  citecolor    = black,
+}
+
+% --- Theorem environments ---
+\newtheorem{theorem}{Theorem}
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{definition}[theorem]{Definition}
+\theoremstyle{remark}
+\newtheorem{remark}[theorem]{Remark}
+
+% --- Project-registered notation ONLY (do not invent shorthand) ---
+% \newcommand{...}{...}
+
+\begin{document}
+
+% --- Title Block ---
+\begin{center}
+{\Large \textbf{PLACEHOLDER: Title}}
+
+{\large PLACEHOLDER: Subtitle}
+
+\medskip
+
+Internal Report \hspace{1em}|\hspace{1em} \today
+\end{center}
+
+% --- Plan paragraph: the steps of the document, one sentence each ---
+\textbf{Plan.} PLACEHOLDER: one method/idea, then the ordered list of results
+(1) ... (2) ... Everything below is proved; the honest boundary is one closing
+remark.
+
+%-----------------------------------------------------%
+\section{Setup}
+%-----------------------------------------------------%
+
+% Primitives ONLY, as bullets. No welfare aggregates, no benchmarks —
+% those are defined at first use in their own sections.
+
+PLACEHOLDER: primitives paragraph (type space, payoff, the one derived number
+actually used globally).
+
+\begin{itemize}
+  \item \textbf{Market.} PLACEHOLDER (weak orderings here; ties dispatched
+    inside the proofs that meet them, not assumed away).
+  \item \textbf{Equilibrium.} PLACEHOLDER: cite what the source proves
+    (sorting, activity, uniqueness) and footnote what is maintained.
+\end{itemize}
+
+% Optional inline figure — non-floating, never alone on a page:
+% \begin{center}
+% \begin{tikzpicture}[x=0.8cm, y=0.8cm, font=\footnotesize] ... \end{tikzpicture}
+% \end{center}
+
+%-----------------------------------------------------%
+\clearpage
+\section{Step 1: PLACEHOLDER first result}
+%-----------------------------------------------------%
+
+% 1. Definitions this section needs (first use), argument-explicit:
+PLACEHOLDER: The object bounded is ...
+\[
+\Pi(\pi) \;\equiv\; \dots
+\]
+
+% 2. Motivation prose (economics, in words — no bullets here):
+PLACEHOLDER: why this result should hold, in words.
+
+% 3. Theorem with FULL inline hypotheses:
+\begin{theorem}[PLACEHOLDER]\label{thm:one}
+PLACEHOLDER: one-sentence statement; hypotheses inline; conclusion in
+registered notation.
+\end{theorem}
+
+% 4-5. Proof, bulleted; key identity as an align chain:
+\begin{proof}
+\begin{itemize}
+  \item \emph{PLACEHOLDER first move.}
+    \begin{align*}
+    X &= \dots && \text{the definition}\\
+      &= \dots && \text{insert \eqref{eq:placeholder}}\\
+      &= \dots && \text{the key regrouping, named in words}
+    \end{align*}
+  \item PLACEHOLDER next move, with its reason.
+  \item PLACEHOLDER conclusion. \qedhere
+\end{itemize}
+\end{proof}
+
+%-----------------------------------------------------%
+\clearpage
+\section{Step 2: PLACEHOLDER main theorem}
+%-----------------------------------------------------%
+
+% 1. Definitions at first use (e.g., CS(b_1,...,b_K); benchmarks as values of
+%    the same function at special configurations, in words then symbols).
+
+% 2. Motivation prose before the theorem.
+
+% 3. Theorem, full inline hypotheses, complete equality characterization.
+\begin{theorem}[PLACEHOLDER]\label{thm:main}
+PLACEHOLDER.
+\end{theorem}
+
+% 4. Strategy paragraph: name the parts, one clause per lemma's role
+%    (bulleted if 3+), flag the crux and where each key assumption enters.
+
+% 5. Assembly proof FIRST (forward-cites the lemmas; exhaustive case list,
+%    each case with its own correct reason). May start on a fresh page:
+% \clearpage
+\begin{proof}[Proof of Theorem~\ref{thm:main}]
+\begin{itemize}
+  \item PLACEHOLDER case, directly.
+  \item PLACEHOLDER case: Lemma~\ref{lem:a}.
+  \item PLACEHOLDER case: Lemma~\ref{lem:b}. \qedhere
+\end{itemize}
+\end{proof}
+
+% 6. Shared inputs as numbered displays (never buried in one lemma's proof):
+It remains to prove the lemmas. PLACEHOLDER shared input:
+\begin{equation}\label{eq:placeholder}
+\dots
+\end{equation}
+
+\begin{lemma}[PLACEHOLDER]\label{lem:a}
+PLACEHOLDER: full inline hypotheses,
+\[
+\dots, \qquad \text{for } K \in \{\dots\}.
+\]
+\end{lemma}
+
+\begin{proof}
+\begin{itemize}
+  \item PLACEHOLDER, by \eqref{eq:placeholder}.
+  \item PLACEHOLDER. \qedhere
+\end{itemize}
+\end{proof}
+
+\begin{lemma}[PLACEHOLDER]\label{lem:b}
+PLACEHOLDER: full inline hypotheses and conclusion.
+\end{lemma}
+
+\begin{proof}
+\begin{itemize}
+  \item PLACEHOLDER, by \eqref{eq:placeholder}.
+  \item PLACEHOLDER. \qedhere
+\end{itemize}
+\end{proof}
+
+%-----------------------------------------------------%
+\clearpage
+\section*{Closing remark: the honest boundary}
+%-----------------------------------------------------%
+
+PLACEHOLDER: what is distribution-free vs. specialized; what remains open
+(\textcolor{red}{in red}); the maintained assumption restated in one clause.
+
+\end{document}
