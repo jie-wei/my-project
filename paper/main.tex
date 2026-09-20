@@ -28,7 +28,7 @@
 \def\section@size{\normalsize\mdseries}
 \makeatother
 
-\newtheorem{theorem}{Theorem}[section]
+\newtheorem{theorem}{Theorem}
 \newtheorem{lemma}[theorem]{Lemma}
 \newtheorem{proposition}[theorem]{Proposition}
 \newtheorem{corollary}[theorem]{Corollary}
@@ -46,6 +46,22 @@
 %% Custom commands
 \newcommand{\versioninfo}{This Version: \DTMnow}
 \newcommand{\important}[1]{\vspace{1.2em}\noindent\textbf{\textcolor{purple}{#1}}\par\vspace{0.5em}\noindent}
+
+%% Subfile-mode hooks. Both gated by \@ifclassloaded{subfiles}, which is
+%% true only when a subfile is being compiled standalone.
+%%   1. \AtEndDocument: emit a References list at the end of the subfile PDF.
+%%      In full-paper mode the regular \bibliography call below handles it.
+%%   2. xr + \externaldocument{../main}: import labels from main.aux
+%%      so cross-references to §-labels in other subfiles resolve. Requires
+%%      main.tex to have been compiled at least once (main.aux must exist
+%%      next to main.tex; .latexmkrc's $success_cmd preserves it).
+\makeatletter
+\@ifclassloaded{subfiles}{%
+    \usepackage{xr}%
+    \externaldocument{../main}%
+}{}
+\AtEndDocument{\@ifclassloaded{subfiles}{\bibliographystyle{ecta}\bibliography{references}}{}}
+\makeatother
 
 \endlocaldefs
 

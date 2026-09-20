@@ -67,11 +67,8 @@ my-project/
 │   ├── .latexmkrc                   # latexmk config (aux dir, cleanup)
 │   └── references.bib               # Bibliography
 │
-├── .claude/
-│   ├── agents/                      # Subagent prompts (orchestrator)
-│   ├── rules/                       # Behavioral rules (auto-loaded)
-│   ├── hooks/                       # Automation hooks
-│   └── skills/                      # Workflow skills
+├── .agents/
+│   └── skills/                      # Shared workflow skills (Claude Code + Codex)
 │       ├── write-code/              #   /write-code — implement Python code
 │       ├── write-summary/           #   /write-summary — write LaTeX summary from outputs
 │       ├── review-code/             #   /review-code — Python code review
@@ -81,11 +78,19 @@ my-project/
 │       ├── analyze-data/            #   /analyze-data — data analysis
 │       └── commit/                  #   /commit — stage, commit, PR, merge
 │
+├── .claude/
+│   ├── agents/                      # Subagent prompts (orchestrator)
+│   ├── rules/                       # Behavioral rules (auto-loaded)
+│   ├── hooks/                       # Automation hooks
+│   └── skills -> ../.agents/skills/  # Claude discovery link
+│
 ├── CLAUDE.md                        # Claude Code entry point
 └── .gitignore
 ```
 
 ## Setup
+
+Skills live in `.agents/skills/` and are shared by Claude Code and Codex. Edit them there; `.claude/skills` is a relative symlink to the same folder. When copying this template locally, include hidden folders and preserve symlinks (for example, `cp -a my-project my-new-project`). Each copy then uses its own skills. Codex invocation settings live in each skill’s `agents/openai.yaml`.
 
 1. **Clone and rename:**
 
