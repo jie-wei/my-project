@@ -18,6 +18,10 @@ data/processed/*
 # Jupyter
 .ipynb_checkpoints/
 
+# Slide build files (keep the PDF preview beside its source)
+/slides/.build/
+/slides/*.synctex.gz
+
 # OS
 .DS_Store
 

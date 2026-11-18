@@ -16,11 +16,11 @@ Run an end-to-end data analysis in Python: load, explore, analyze, and produce p
 
 ## Constraints
 
-- **Follow project conventions** in `.claude/rules/standalone-conventions.md`
-- **Pure logic in `src/`, I/O in `scripts/`.** Functions that transform data go in `code/src/mypackage/`. Scripts that read files, call those functions, and save results go in `code/scripts/`.
-- **All paths from `config.py`** -- import from `code/src/mypackage/config.py`, never hardcode.
+- **Follow project conventions** in `.agents/rules/standalone-conventions.md`
+- Follow the [file I/O guide](../../rules/standalone-file-io.md). Calculations and reusable readers or writers live in `src/`. Scripts choose inputs, parameters, and destinations.
+- Import base directories and `output_path` from `mypackage.config`, then compose filenames in the script.
 - **Never modify `data/raw/`** -- it is sacred.
-- **Save all outputs** (figures, tables, processed data) to appropriate `output/` directories.
+- Save processed datasets under `data/processed/{variant_name}/` and shared rebuilt datasets under `data/intermediate/`. Save tables and figures in the locations returned by `output_path`.
 - **Run `/review-code`** on generated code before presenting results.
 
 ---
@@ -29,8 +29,8 @@ Run an end-to-end data analysis in Python: load, explore, analyze, and produce p
 
 ### Phase 1: Setup and Data Loading
 
-1. Read `.claude/rules/standalone-conventions.md` and `.claude/rules/standalone-quality.md` for project standards.
-2. Check `code/src/mypackage/config.py` for existing path definitions. Add new paths if needed.
+1. Read `.agents/rules/standalone-conventions.md` for project standards.
+2. Select the tier and variant, check `config.py` for existing paths, and use the path construction example in the file I/O guide.
 3. Create script with proper header (see Script Structure below).
 4. Load required packages at top.
 5. Set seed once at top for any stochastic operations: `np.random.seed(42)` or `random.seed(42)`.
@@ -45,7 +45,7 @@ Generate diagnostic outputs:
 - **Time patterns:** if panel data, plot trends over time
 - **Group comparisons:** if treatment/control, compare pre-treatment means
 
-Save diagnostic figures to `output/exploration/[name]/` or `output/core/diagnostics/`.
+Save diagnostic figures under `output_path(tier, "figures", variant)`, using descriptive filenames.
 
 ### Phase 3: Main Analysis
 
@@ -71,8 +71,8 @@ Based on the research question:
 
 ### Phase 5: Save and Review
 
-1. Save processed data to `data/intermediate/` or `data/processed/` as appropriate.
-2. Save all figures and tables to `output/`.
+1. Save shared rebuilt data to `data/intermediate/` and variant datasets to `data/processed/{variant_name}/`.
+2. Save figures and tables to `output/{tier}/figures/{variant_name}/` and `output/{tier}/tables/{variant_name}/`.
 3. Create output directories as needed with `os.makedirs(..., exist_ok=True)`.
 4. Run `/review-code` on generated code:
    "Review the script at code/scripts/[tier]/[script_name].py"
@@ -85,11 +85,11 @@ Based on the research question:
 
 Decide where code goes based on the src/scripts split:
 
-**Goes in `code/src/mypackage/` (pure logic):**
+**Reusable calculations and I/O functions in `code/src/mypackage/`:**
 - Data cleaning/transformation functions
 - Statistical model specifications
 - Table/figure formatting functions
-- Anything reusable across scripts
+- Reusable readers and writers that receive explicit paths
 
 **Goes in `code/scripts/` (I/O):**
 - Loading data from disk
@@ -118,11 +118,17 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 
-from mypackage.config import RAW_DIR, PROCESSED_DIR, OUTPUT_DIR
+from mypackage.config import PROCESSED, RAW, output_path
 # from mypackage.core.analysis import your_function  # if using src/ functions
 
 # ── Setup ──────────────────────────────────────────
 np.random.seed(42)
+TIER = "exploration"
+VARIANT = "example_variant"
+input_file = RAW / "dataset.csv"
+processed_dir = PROCESSED / VARIANT
+tables_dir = output_path(TIER, "tables", VARIANT)
+figures_dir = output_path(TIER, "figures", VARIANT)
 
 # ── Data Loading ───────────────────────────────────
 # [Load and clean data]
@@ -144,19 +150,7 @@ np.random.seed(42)
 
 ## Output Location
 
-Determine the save paths:
-1. Check if the analysis is part of an exploration (`exploration/[name]/`).
-2. If YES:
-   - Script: `code/scripts/exploration/[name]/`
-   - Functions: `code/src/mypackage/exploration/[name]/`
-   - Outputs: `output/exploration/[name]/`
-   - Notes: `docs/exploration/[name]/`
-3. If NO (production analysis):
-   - Script: `code/scripts/core/NN_descriptive_name.py` (next number in sequence)
-   - Functions: `code/src/mypackage/core/`
-   - Outputs: `output/core/figures/`, `output/core/tables/`
-   - Data: `data/intermediate/` or `data/processed/`
-4. Create directories if they do not exist.
+Use the tier and variant selected during setup. Follow the [file I/O guide](../../rules/standalone-file-io.md) for script placement and data and output directories. Create the destination directories before saving, then verify that the summary workflow can find the generated files.
 
 ---
 
@@ -165,6 +159,6 @@ Determine the save paths:
 - **Reproduce, don't guess.** If the user specifies an analysis, run exactly that.
 - **Show your work.** Print summary statistics before jumping to modeling.
 - **Check for issues.** Look for multicollinearity, outliers, missing data patterns, perfect prediction.
-- **Use config.py paths.** All paths imported from config, never hardcoded.
+- Use config.py base directories and `output_path`, with ordinary filenames composed in the script.
 - **No dead code.** Remove commented-out alternatives before finishing.
 - **Explain choices.** If you pick a specific estimator or specification, say why in a code comment.

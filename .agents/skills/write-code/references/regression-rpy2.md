@@ -5,6 +5,7 @@ When you need R's `fixest` package for fixed-effect regressions (feols, fepois, 
 ## Setup
 
 ```python
+import pandas as pd
 import rpy2.robjects as ro
 from rpy2.robjects import pandas2ri
 from rpy2.robjects.conversion import localconverter
@@ -63,46 +64,51 @@ Use `etable()` with `style.tex("aer")` for AER-formatted output:
 # Combine models into a list for etable
 model_list = ro.ListVector(models)
 
-# Generate LaTeX table
+# R expects a named character vector: internal names -> display labels.
+label_map = {
+    "x1": "Treatment Variable",
+    "x2": "Control 1",
+    "x3": "Control 2",
+    "x1:post": "Treatment x Post",
+}
+r_labels = ro.StrVector(list(label_map.values()))
+r_labels.names = ro.StrVector(list(label_map.keys()))
+
 tex_output = fixest.etable(
     model_list,
     style_tex=fixest.style_tex("aer"),
     headers=ro.StrVector(["Baseline", "Controls", "Interactions"]),
-    dict_=ro.StrVector([
-        "x1", "Treatment Variable",
-        "x2", "Control 1",
-        "x3", "Control 2",
-        "x1:post", "Treatment x Post",
-    ]),
+    dict=r_labels,
     drop=ro.StrVector(["Constant"]),
     tex=True,
 )
 
-# Extract LaTeX string
-tex_str = str(tex_output)
+# etable returns a character vector of LaTeX lines.
+tex_str = "\n".join(tex_output) + "\n"
 ```
 
 ### Variable Label Mapping
 
-The `dict_` parameter maps internal variable names to presentable labels. Format is alternating pairs: `["internal_name", "Display Label", "internal_name2", "Display Label 2", ...]`.
+The `dict` argument takes a named R character vector: its values are display labels and its `names` attribute contains the internal variable names. An unnamed vector of alternating strings is not a mapping. Use `dict=` in the Python call; `dict` is a valid Python keyword argument. See the [official `etable` reference](https://lrberge.github.io/fixest/reference/etable.html).
 
 If there's no obvious mapping for a variable, ask the user what label to use rather than guessing. Research-facing labels matter — they appear in the published paper.
 
 ### Saving .tex Output
 
 ```python
-from mypackage.config import TABLES_{VARIANT_NAME}
+from mypackage.config import output_path
 
-TABLES_{VARIANT_NAME}.mkdir(parents=True, exist_ok=True)
-tex_path = TABLES_{VARIANT_NAME} / "regression_results.tex"
+tables_dir = output_path(TIER, "tables", VARIANT)
+tables_dir.mkdir(parents=True, exist_ok=True)
+tex_path = tables_dir / "regression_results.tex"
 
-with open(tex_path, "w") as f:
+with open(tex_path, "w", encoding="utf-8") as f:
     f.write(tex_str)
 ```
 
-The `.tex` file should be directly importable in a LaTeX document:
+Use the calling script's `TIER` and `VARIANT`. Resolve the table path relative to the document being compiled. In an empirical summary with its configured `\outdir`, include the file with:
 ```latex
-\input{output/{tier}/tables/{variant_name}/regression_results.tex}
+\input{\outdir/tables/{variant_name}/regression_results.tex}
 ```
 
 ## Notes

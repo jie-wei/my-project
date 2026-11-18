@@ -5,8 +5,7 @@ description: >-
   claims against pipeline outputs; (B) theory — audit mathematical proofs for
   logical gaps, incorrect claims, and missing boundary cases. Use this skill
   whenever the user asks to verify a summary, fact-check a draft, check a proof,
-  review math, audit a theory note, or review a summary against data. Also use
-  when the orchestrator routes docs/*.tex files for review. Distinct from
+  review math, audit a theory note, or review a summary against data. Distinct from
   /review-manuscript (qualitative academic review) and /review-details
   (grammar/typos). Do NOT use for writing summaries (use /write-summary).
 disable-model-invocation: false
@@ -22,16 +21,17 @@ Review a summary document with fresh, harsh eyes. Treat every claim as potential
 
 ---
 
-## Step 1: Locate the Summary and Detect Mode
+## Step 1: Identify the Review Scope and Mode
 
-Find the `.tex` file from `$ARGUMENTS` or context:
-- Direct path if provided
-- `docs/{tier}/{variant_name}/summary-{variant_name}.tex`
-- Glob for matches in `docs/`
+For empirical work, read the [file I/O guide](../../rules/standalone-file-io.md) before tracing the pipeline's inputs and outputs.
 
-If the summary doesn't exist, tell the user and stop.
+Locate the requested document or supplied proof from `$ARGUMENTS` and context. For a saved summary, use the given path or look under `docs/{tier}/{variant_name}/`. For a proof supplied in chat, review that text. If the necessary material is unavailable, identify what is missing.
 
-Determine the mode: if the summary contains `\begin{lemma}`, `\begin{theorem}`, `\begin{proof}`, or proof-style structure → **Theory**. If it contains `\input{`, `\includegraphics`, or references pipeline outputs → **Empirics**. If ambiguous, check whether `output/{tier}/tables/{variant_name}/` exists (Empirics) or only `docs/{tier}/{variant_name}/` notes exist (Theory).
+Establish the requested scope and follow the [research reasoning conventions](../../rules/standalone-conventions.md#research-reasoning). A brief note can intentionally omit background or unrelated results. Check every included claim, its necessary qualifications, and any evidence needed to interpret it. A referenced result need not reproduce its proof, while a document claiming to provide a proof must supply a complete argument.
+
+Check exposition against the same conventions: one main idea per paragraph, readable spacing, separate pages for major sections, and layered proofs. Report presentation problems separately from mathematical or numerical errors. Intentional page breaks and whitespace are not defects, and a short note needs no extra interpretation paragraphs merely to fill a template.
+
+Choose the mode from the claims and sources. An equation sheet or mathematical argument is **Theory**, even without theorem environments. Numerical claims drawn from pipeline outputs are **Empirics**. For mixed documents, review each type of claim with the relevant workflow. Figure commands or output-directory existence alone do not determine the mode.
 
 **Empirics:** Read `references/workflow-empirics.md` and follow it.
 
@@ -47,13 +47,13 @@ Follow the workflow file loaded in Step 1. It covers: reading sources, inventory
 
 ## Step 10: Produce the Report
 
-The workflow file specifies the report format (empirics: fact-check report; theory: math review report). Generate it according to the template in the workflow.
+For a saved-document review, use the relevant workflow’s report format. For a review confined to chat, present the findings directly. In both cases, identify any unsupported claims and explain the reasoning or source comparison.
 
 ---
 
 ## Step 11: Save
 
-Save the report to `docs/quality_reports/reviews/{tier}/review-summary-{variant_name}.md`. Create the directory if it does not exist. The report replaces the previous one on re-run — no date suffix.
+For a saved-document review, save the report to `docs/quality_reports/reviews/{tier}/review-summary-{variant_name}.md`. Create the directory if needed and replace the previous report on re-run. For a review confined to discussion or a proof supplied in chat, return the findings in chat unless a saved report is requested.
 
 ---
 

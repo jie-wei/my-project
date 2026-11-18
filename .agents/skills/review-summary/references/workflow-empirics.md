@@ -9,16 +9,16 @@ Steps 2–9 for fact-checking an empirics summary against pipeline outputs.
 Understanding which script produces which output is essential for knowing what source files to check against.
 
 - List scripts in `code/scripts/{tier}/{variant_name}/` (exploration/archive) or numbered scripts in `code/scripts/{tier}/` (core)
-- Read each script to identify: what data it loads, what it outputs, where it saves
+- Read the scripts producing the outputs in scope and their dependencies to identify what they load, produce, and save
 - Read relevant src modules in `code/src/mypackage/{tier}/{variant_name}/`
 - **Trace the full I/O chain**: for each script, verify that it reads from the correct input paths and writes to the correct output paths for this variant
 - Build a map: output file → script that produced it → input data it used
 
 ---
 
-## Step 3: Inventory All Source Files
+## Step 3: Read Sources for the Claims in Scope
 
-Scan and read every source file that the summary could reference:
+Read the sources needed to verify the included claims and relevant qualifications:
 
 **Tables** (`output/{tier}/tables/{variant_name}/`):
 - Read `.csv` files — column names, values, sample sizes
@@ -86,13 +86,9 @@ Flag claims that mischaracterize the direction, magnitude, significance, or patt
 
 ---
 
-## Step 9: Check for Orphaned Outputs
+## Step 9: Check Relevant Omissions
 
-List any files in the output directories that are NOT referenced in the summary:
-- `output/{tier}/tables/{variant_name}/` — unreferenced `.tex` or `.csv` files
-- `output/{tier}/figures/{variant_name}/` — unreferenced `.png` or `.pdf` files
-
-These may be results the summary should discuss but missed.
+Check whether the document omits a requested result or evidence that qualifies or contradicts an included claim. A short note may intentionally cover selected tables or figures. Report an omission only when it affects the requested coverage or the interpretation of a claim.
 
 ---
 
@@ -123,9 +119,9 @@ These may be results the summary should discuss but missed.
 
 1. **[Section Name]:** Claims "[quoted text]". Data shows [actual pattern] (source: `[path]`).
 
-## Orphaned Outputs
+## Relevant Omissions
 
-These output files are not referenced in the summary:
+These omitted outputs matter to the requested scope or an included claim:
 - `[path]`
 ```
 
@@ -138,23 +134,5 @@ These output files are not referenced in the summary:
 **Summary:** docs/{tier}/{variant_name}/summary-{variant_name}.tex
 **Status:** CLEAN
 
-All numerical claims verified against source files. All figure references valid. No orphaned outputs.
+All numerical claims verified against source files. All figure references valid. No omissions affecting the requested scope or the interpretation of included claims.
 ```
-
-**Structured output block** (for orchestrator):
-
-```
---- REVIEW RESULT ---
-STATUS: CLEAN | DISCREPANCIES_FOUND
-MODE: EMPIRICS
-TARGET: [path to summary]
-NUMERICAL_ERRORS: [N]
-TABLE_MISMATCHES: [N]
-MISSING_FIGURES: [N]
-QUALITATIVE_ERRORS: [N]
-ORPHANED_OUTPUTS: [N]
-OVERALL: [1-5]
---- END REVIEW RESULT ---
-```
-
-Scoring: 5 = all clean, 4 = orphaned outputs only, 3 = minor issues (rounding, 1-2 small errors), 2 = multiple errors, 1 = pervasive inaccuracies.

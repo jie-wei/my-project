@@ -19,7 +19,7 @@ Critically examine a research design, analysis, or manuscript and challenge it w
 ## Setup
 
 1. **Read the target.** If `$ARGUMENTS` is a file path, read it. If it's a description, work from that.
-2. **Read project context.** Check `docs/core/` and `docs/exploration/` for related analysis notes. Check `paper/` for manuscript context. Check `.claude/rules/` for project conventions.
+2. **Read project context.** Check `docs/core/` and `docs/exploration/` for related analysis notes. Check `paper/` for manuscript context. Check `.agents/rules/` for project conventions.
 3. **If applicable, read adjacent files** -- related scripts, data documentation (`data/codebook.md`), or earlier analysis in the same exploration.
 
 ---

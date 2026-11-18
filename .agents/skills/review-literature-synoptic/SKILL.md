@@ -22,8 +22,8 @@ This skill understands the literature on its own terms. It traces how papers con
 ## Mode Detection
 
 Parse `$ARGUMENTS`:
-- **`deepen`** → run the Deepen workflow (enriches existing `[UNSUMMARIZED]` entries using `/read-paper` summaries)
-- **`merge`** → run the Merge workflow (integrates newly summarized papers into an existing synoptic review)
+- **`deepen`** → run the Deepen workflow (enriches existing entries from paper summaries or original full text)
+- **`merge`** → run the Merge workflow (integrates newly read papers into an existing synoptic review)
 - **Anything else** → standard synoptic review (Steps 1-3 below)
 
 ---
@@ -32,11 +32,15 @@ Parse `$ARGUMENTS`:
 
 Build on existing work rather than starting from scratch:
 
-1. **Read `summary-*.md` files** in `docs/literature/` — individual paper summaries from `/read-paper` contain model details, key findings, and core assessments. Do NOT read `summary-literature-comparison*.md` — that is a comparison review written through the lens of our paper, and importing its framing would contaminate the synoptic review's neutrality.
+1. **Read individual paper summaries or original sources** in `docs/literature/` and any user-supplied locations. Summaries can contain model details, key findings, and core assessments; when absent, read the relevant paper directly. Do NOT read `summary-literature-comparison*.md` — that is a comparison review written through the lens of our paper, and importing its framing would contaminate the synoptic review's neutrality.
 2. **Read the paper body** for any features/ingredients section — it may already contain an ingredient tree. The body lives in `paper/sections/*.tex` and `paper/appendices/*.tex`; `paper/main.tex` only holds the preamble and `\subfile{...}` chain, so reading `main.tex` alone is not enough.
 3. **Check `paper/references.bib`** for papers already in the project.
 4. **Use `WebSearch`** to find recent publications that may be missing from local files.
 5. **Use `WebFetch`** to access working paper repositories and abstracts.
+
+Use an existing individual paper summary when available. Otherwise read the original PDF or full text directly, following the [PDF guide](../../rules/standalone-pdf.md). Match the paper and version, read the sections supporting each substantive claim, and retain page, section, or result references. A separate summary file is optional.
+
+Use the available search and page/PDF-reading tools in either client; `WebSearch` and `WebFetch` below name Claude's equivalents. If only an abstract is accessible, label the entry as preliminary and retain `[UNSUMMARIZED]`. Do not infer detailed assumptions or theorems from an abstract. Report unavailable sources without blocking work on accessible papers.
 
 ---
 
@@ -107,7 +111,7 @@ Use bullet points and sub-bullets for factual content. Reserve prose paragraphs 
 
 1. **Map papers to cells.** For each (ingredient, question theme) pair, identify which papers address it. A paper belongs in a cell if it takes the ingredient as a modeling primitive and asks a question in that theme. Write this mapping to a temp file — it is the input for step 2.
 
-2. **Fill cells in parallel.** For each non-empty cell, spawn a sub-agent that reads the `summary-*.md` files for the papers in that cell and writes a one-phrase answer + citation. The sub-agent's prompt: "Read [summary file paths]. In one phrase, what does this literature find about [ingredient] in the context of [question theme]? Include the key citation." Each sub-agent sees only its own papers and produces one cell entry. This parallelization is the reason the matrix can be both concise and accurate — each cell gets focused attention grounded in the actual paper summaries, not LLM memory.
+2. **Fill cells in parallel.** For each non-empty cell, spawn a sub-agent that reads the summaries or original full text for the papers in that cell and writes a one-phrase answer + citation. The sub-agent's prompt: "Read [summary or original-source paths]. In one phrase, what does this literature find about [ingredient] in the context of [question theme]? Include the key citation." Each sub-agent sees only its own papers and produces one cell entry. This parallelization is the reason the matrix can be both concise and accurate — each cell gets focused attention grounded in the actual sources, not LLM memory.
 
 3. **Assemble sub-matrices.** Collect all cell entries and arrange them into sub-matrices. **Split into multiple sub-matrices** when there are more than 3-4 question columns — a single wide table is unreadable in markdown and PDF. Group related question themes into each sub-matrix. Each sub-matrix shares the same ingredient rows but covers a different subset of question columns. Add a brief heading above each sub-matrix indicating which themes it covers. Use `—` for empty cells.
 
@@ -125,48 +129,33 @@ Use bullet points and sub-bullets for factual content. Reserve prose paragraphs 
 
 ## Deepen Workflow
 
-When the user says `deepen`, "enrich the synoptic review", "update entries with summaries", or similar — this mode enriches existing entries using the deep summaries produced by `/read-paper`.
+Use this mode to improve existing synoptic entries with a detailed reading of summaries or original papers.
 
-The idea: initial entries are written from abstracts and LLM memory (shallow). After `/read-paper` produces a `summary-*.md` file, you can go back and enrich the entry with real understanding — better model descriptions, more accurate findings, and more precisely traced intellectual evolution.
+1. **Find the requested review and entries.** Look in `docs/literature/summary-literature-synoptic*.md`.
 
-### Steps
+2. **Find usable sources.** Look for matching `summary-*.md` files, local PDFs, supplied links, or accessible full text. Check paper identity and version. Read the original paper when a summary is absent or insufficient.
 
-1. **Find synoptic review files** — scan for entries with `[UNSUMMARIZED]` tags in:
-   - `docs/literature/summary-literature-synoptic*.md`
+3. **Proceed within the requested scope.** Read available sources directly; no separate paper-reading command or additional approval is required. Report unavailable sources and retain preliminary tags for those entries.
 
-2. **Find matching summary files** — for each `[UNSUMMARIZED]` entry, search for a corresponding `summary-{year}-{author}.md` file (match by author name and year). Check these locations:
-   - `docs/literature/` and its subdirectories
-   - The directory where the paper's PDF lives (most common — `/read-paper` places summaries alongside PDFs)
+4. **Update each entry from the evidence.**
+    - Describe the model ingredients, contribution, and findings with the assumptions and source locations that support them.
+    - Ground the connection to earlier work in the actual papers.
+    - Link an existing summary, or link the original paper and identify its relevant pages or results.
+    - Remove `[UNSUMMARIZED]` only after enriching the entry. Keep `[UNVERIFIED]` until the citation details are checked.
 
-3. **Report what's available** — show the user which `[UNSUMMARIZED]` entries have summary files ready, and which don't (those need `/read-paper` first). Let the user confirm which to deepen, or proceed with all that have summaries.
-
-4. **For each entry with a summary file:**
-   a. Read the `summary-*.md` file — focus on story summary, model details, and core assessment.
-   b. **Update the entry:**
-      - Rewrite **Main contribution** and **Key finding** based on actual paper content, not abstract-level guesses.
-      - Rewrite **Connection** with specific, grounded tracing of intellectual evolution — now that you've read the actual arguments, you can say precisely how this paper extends or modifies its predecessors.
-      - Add a **Summary** link: `[Summary](summary-year-author.md)`
-   c. **Remove `[UNSUMMARIZED]`** from the entry.
-
-5. **Update synthesis paragraphs** — deeper readings may reveal connections or tensions the initial pass missed. Re-read the "What the literature has learned" paragraphs and update.
-
-6. **Update the matrix** — answers may become more precise after deep reading.
+5. **Update the map.** Revisit the ingredient tree, theme syntheses, matrix, and index when the reading changes the field's picture. Keep repeated entries' links and tags consistent.
 
 ### Entry format after deepening
 
 ```markdown
-- **Author (Year, Journal)** — [Summary](summary-year-author.md)
-    - **Model:** [updated setting — grounded in actual paper content]
-    - **Main contribution:**
-        - [Updated point 1 — with specific theorem/proposition numbers]
-        - [Updated point 2 — grounded in actual paper content]
-    - **Key finding:**
-        - [Updated finding 1 — specific, with result numbers]
-        - [Updated finding 2 — if applicable]
-    - **Connection:** [Updated — precisely traces how this paper extends Author2 (Year2) by adding X, changing Y]
+- **Author (Year, Journal)** — [Paper](actual-source-url-or-relative-path)
+    - **Model:** [Setting and necessary assumptions]
+    - **Main contribution:** [Supported claim]
+    - **Key finding:** [Result with section, page, or proposition reference]
+    - **Connection:** [How this advances or changes earlier work on the question]
 ```
 
-Note: `[UNSUMMARIZED]` is gone, replaced by the clickable Summary link. `[UNVERIFIED]` stays until citation details are independently confirmed.
+Use a `Summary` link instead when a summary file exists. Retain any unverified-citation tag.
 
 ---
 
@@ -180,9 +169,9 @@ When the user says `merge`, "add new papers", "integrate these into the synoptic
 
 ### Steps
 
-1. **Identify new papers.** Find summary files in `docs/literature/` that are *not* referenced anywhere in the synoptic review file. Compare the set of `summary-*.md` files against all summary links in the review.
+1. **Identify new papers.** Start with the papers the user supplied or requested. If asked to scan the local collection, check summaries and original papers in `docs/literature/`. Compare paper identities and versions against existing review entries, rather than treating a missing summary link as a new paper.
 
-2. **Triage each paper.** For each new paper, read its summary (Story Summary + Core Assessment) and classify it:
+2. **Triage each paper.** For each new paper, read its summary or original full text and classify it:
    - **Ingredient paper** → introduces a new building block (update ingredient tree in Section 2 + relevant question themes in Section 4 + matrix in Section 5)
    - **Question-answering paper** → answers an existing question with existing ingredients (add to question theme in Section 4 + matrix in Section 5)
    - **Combination paper** → combines existing ingredients (Section 7 + matrix in Section 5)
@@ -209,12 +198,12 @@ When the user says `merge`, "add new papers", "integrate these into the synoptic
    - [ ] Section 10: add to index (must mirror Section 4 structure)
 
    **Parallelization guidance.** As the review grows large (>300 lines), a single agent may struggle with context. Use sub-agents, but split by *section*, not by paper:
-   - One agent for Section 2 + 4 edits (needs: the new paper summaries + current sections to know where to place entries)
+   - One agent for Section 2 + 4 edits (needs: the new papers or summaries + current sections to know where to place entries)
    - One agent for Section 5 + 10 edits (needs: list of new papers + which question theme each belongs to — provide this as input, don't make the agent figure it out)
 
    Each agent edits *different lines* of the same file, so they won't conflict. But do NOT run two agents on the same section. And if using cloud sync (Dropbox), run agents sequentially or write to temp files first, then merge.
 
-   The key context each agent needs: (a) the summary file(s) for its papers, (b) the specific section it's editing, (c) the merge plan (which papers go where). Provide the merge plan explicitly — don't make sub-agents rediscover the classification.
+   The key context each agent needs: (a) the summary or original-source file(s) for its papers, (b) the specific section it's editing, (c) the merge plan (which papers go where). Provide the merge plan explicitly — don't make sub-agents rediscover the classification.
 
 5. **Revisit Sections 1-3.** After merging new papers, re-read Sections 1 (Thesis), 2 (Framework/Ingredient Tree), and 3 (Scope). These are high-level summaries that can only be written well after understanding the full literature. New papers may introduce ingredients that reshape the tree, open new question themes that change the thesis, or extend the scope. Update as needed.
 
@@ -222,7 +211,7 @@ When the user says `merge`, "add new papers", "integrate these into the synoptic
    - Every theme in Section 10 should correspond to a theme in Section 4 (same names, same ordering). If you added a new 4.N, Section 10 must have a matching subsection.
    - Every paper in Section 4 should appear in Section 10, and vice versa
    - Ingredient tree (Section 2) includes all ingredients referenced in the matrix (Section 5)
-   - No `[UNSUMMARIZED]` tags should remain on papers that have summary files
+   - Remove `[UNSUMMARIZED]` only after reading the relevant source and incorporating its evidence; the mere existence of a summary file is insufficient
    - New "What the literature has learned" paragraphs exist for any new question themes
    - The matrix (Section 5) has cells for all new papers
 
@@ -254,7 +243,7 @@ If the project has `paper/references.bib`, offer to append new BibTeX entries. N
 
 For a literature with 30+ papers, building the synoptic review in a single pass may exceed context. The work has a natural dependency structure — some parts can run in parallel, others must wait. Think in terms of *information independence*, not section numbers.
 
-**Step 1 — Parallel: Per-paper extraction.** Spawn one agent per paper (or per batch of 5-10 papers). Each agent reads one `summary-*.md` file and extracts: what ingredients does this paper assume? What question does it ask? What does it find? These are completely independent — no agent needs to see another paper's summary. Each agent writes its output to a temp file.
+**Step 1 — Parallel: Per-paper extraction.** Spawn one agent per paper (or per batch of 5-10 papers). Each agent reads one paper's summary or original full text and extracts: what ingredients does this paper assume? What question does it ask? What does it find? These are completely independent — no agent needs to see another paper's summary. Each agent writes its output to a temp file.
 
 **Step 2 — Sequential: Assembly.** The main agent reads all extraction outputs and assembles: build the ingredient tree (group and nest ingredients), discover question themes (what common questions emerge from the extracted questions), and assign each paper to its theme. This step requires seeing all papers together to find the right groupings — it cannot be parallelized.
 
@@ -276,19 +265,30 @@ For a literature with 30+ papers, building the synoptic review in a single pass 
 
 ---
 
+## PDF Export When Requested
+
+Use ordinary local compilation tools; no conversion skill is required. With Pandoc and XeLaTeX available, run from the review's directory, substituting its actual filename:
+
+```bash
+pandoc "review.md" --from=markdown+tex_math_dollars+raw_tex --pdf-engine=xelatex -V fontsize=12pt -V geometry:margin=1in -V linestretch=1.1 -o "review.pdf"
+```
+
+If Pandoc is unavailable, create an equivalent LaTeX source in a temporary build directory and compile it with `latexmk -xelatex -interaction=nonstopmode -halt-on-error review.tex`. Preserve the text, nested lists, math, tables, and links. Resolve relative source and image paths from the original review's directory.
+
+Use 12pt serif text, comfortable paragraph and list spacing, and a new page for each major section. For Pandoc, put `\newpage` before major sections in the export source and use a temporary LaTeX header via `--include-in-header` when needed for spacing. Keep figures with their explanations and split wide tables. Inspect the resulting PDF using the [PDF guide](../../rules/standalone-pdf.md). Report a missing compiler or failed build rather than claiming a PDF was produced.
+
+---
+
 ## Important
 
 - **This is NOT a comparison review.** Do not read papers through the lens of any thesis. Do not write "connection to our paper" or "relevance to our argument." The "Connection" field traces how papers relate to *each other* (intellectual evolution), not to our work. If you find yourself comparing to our paper, stop — use `/review-literature-comparison` for that.
 - **Plain language first.** Every ingredient should be understandable by someone outside the field. Technical terms can appear in parentheses, but the plain statement comes first.
 - **The ingredient tree is the core.** Spend the most effort making it clear, well-nested, and well-cited. It is the framework that organizes everything else.
 - **Citation format.** Always include the journal abbreviation: **Author (Year, Journal)**. Standard abbreviations: AER, Ecma, JPE, QJE, REStud, RAND, JIE, TE, JET, AEJ:Micro, MS. For working papers, use "WP." This lets the reader gauge venue without clicking through.
-- **Summary links are mandatory.** Every paper entry must include a `[Summary](summary-year-author.md)` link if the summary file exists. Before writing entries, scan `docs/literature/summary-*.md` to build a list of available summaries. Papers without a summary file keep the `[UNSUMMARIZED]` tag.
-- **Tags.** Every paper entry gets `[UNSUMMARIZED]` and `[UNVERIFIED]` tags by default. `[UNSUMMARIZED]` is removed only by `deepen` after reading the summary. `[UNVERIFIED]` is removed after citation verification via WebSearch/WebFetch or confirmation in `paper/references.bib`. Neither tag is removed by judgment alone.
-- **Use 4-space indentation for nested lists.** Pandoc (used by `/convert-md-to-pdf`) requires 4-space indentation per nesting level — 2-space nesting gets flattened into a single paragraph. Also add a blank line between a bold header (like `**Buyers**`) and the list that follows it, so pandoc treats them as separate blocks.
-- **Write math for PDF compatibility.** Three rules:
-  - Multi-symbol expressions must be explicit `$...$` math. Write `$\mu \to 1$`, not `(μ→1)`.
-  - Subscripts longer than one character need braces. Write `$N_{eff}$`, not `N_eff`.
-  - Isolated Unicode symbols (standalone `β` or `δ`) are fine as-is.
+- **Summary links are mandatory.** Every paper entry must include a `[Summary](summary-year-author.md)` link if the summary file exists. Before writing entries, scan `docs/literature/summary-*.md` to build a list of available summaries. When no summary file exists, link the original paper as `[Paper](...)` with relevant page or result references. Reading status depends on the evidence incorporated, not on the presence of a summary file.
+- **Tags.** Use `[UNSUMMARIZED]` until a substantive summary or original paper has been read and the entry updated with supported claims and source locations. This may occur during review, deepening, or merging. Use `[UNVERIFIED]` until citation details have been checked against a reliable bibliographic source or verified project entry. A file's existence alone does not clear either tag.
+- **Use 4-space indentation for nested lists.** Use 4 spaces per nesting level for reliable Pandoc output. Also add a blank line between a bold header (like `**Buyers**`) and the list that follows it, so pandoc treats them as separate blocks.
+- **Write math for PDF compatibility.** Use explicit LaTeX math delimiters, including single symbols: `$\beta$`, `$\mu \to 1$`, `$N_{eff}$`. Brace multi-character subscripts. Do not rely on a custom Unicode preprocessor.
 - **Use bullet points and sub-bullets** for factual content (paper descriptions, gap lists, index entries). Reserve prose for synthesis paragraphs ("What the literature has learned") and landmark assessments. Each bullet should make one claim or state one fact.
 - **Do NOT fabricate citations.** If unsure about a paper's details, flag it for the user. Getting a citation wrong is worse than omitting it.
 - **BibTeX fields from memory are unreliable.** Mark unverifiable fields with `% UNVERIFIED` comments.

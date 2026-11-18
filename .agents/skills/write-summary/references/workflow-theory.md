@@ -1,32 +1,16 @@
 # Workflow: Theory Summary
 
-Steps 2–7 for producing a self-contained proof walkthrough from math formulation notes.
+Steps 2–7 for producing theory notes or a full proof walkthrough from the current formulation and arguments. Apply the relevant parts to the scope selected in Step 1.
 
 ---
 
 ## Step 2: Read the Math Formulations
 
-The source material typically lives in `docs/{tier}/{variant_name}/` and follows the structure produced by `/solve-econ-as-math`. Read files in this order:
+Start with the latest agreed question, notation, and assumptions. Read the relevant notes in `docs/{tier}/{variant_name}/` and the discussion supplied with the request. Existing `question.md`, `definitions.md`, `assumptions.md`, `findings.md`, `results/`, and review files can help when present. Use the available sources without requiring that file structure.
 
-**1. `question.md`** — The model specification, the question, and verification conditions. This tells you what the summary needs to explain.
+For the results within scope, identify their hypotheses, logical dependencies, proofs, and status as established, assumed, conjectured, or superseded. Check that earlier arguments still apply to the current formulation. Flag a material unresolved conflict instead of silently combining model versions.
 
-**2. `definitions.md`** and **`assumptions.md`** (if present) — The shared vocabulary and assumptions in force. These determine the notation and scope.
-
-**3. `findings.md`** — The central document. Contains the guided proof walkthrough, the logical dependency tree, and the result index with statuses. Start here for the big picture: what was the answer, what are the key steps, what is the proof architecture.
-
-**4. `results/` directory** — Individual result files (one per lemma/theorem), each with IF/THEN/BECAUSE/FAILS WHEN structure. Read these for the detailed proofs and boundary conditions.
-
-**5. Any `reviews/` files** — Past review reports that may flag known issues or superseded results.
-
-From these, extract:
-- The logical dependency tree: which results build on which
-- The status of each result (active, superseded, open) — check the result index in `findings.md`
-- The key definitions, lemmas, theorems, and their proofs
-- What is established vs. what remains open
-
-If the source material does not follow this structure (e.g., it's just free-form notes), read all `.md` files and reconstruct the dependency tree yourself.
-
-The summary document should follow the logical flow of the proofs, not the chronological order of discovery. Use the dependency tree to determine the right presentation order.
+Organize the explanation by logical dependence so the reader can derive forward from the model to the result.
 
 ---
 
@@ -41,13 +25,13 @@ The summary document should follow the logical flow of the proofs, not the chron
 - What is the logical skeleton: which lemmas feed into which?
 - Are there alternative proof paths?
 
-This architecture determines the document structure.
+Use the dependencies needed for the requested result to determine the document structure. An equation sheet or brief statement of established results need not reproduce every supporting proof.
 
 ---
 
 ## Step 5: Plan the Discussion
 
-Think like a theorist. This planning informs what goes in the Discussion section, not the proofs themselves (all proofs should be detailed regardless).
+Use economic interpretation and discussion where they serve the requested document. Any included proof must retain the steps and boundary cases needed for its claim.
 
 - Translate mathematical results back to economic language
 - Note which steps carry the real insight vs. which are routine
@@ -83,11 +67,12 @@ Think like a theorist. This planning informs what goes in the Discussion section
 
 ## Step 6: Read the Template
 
-Read `references/template-latex-theory.tex` for the proof walkthrough structure. Key patterns:
+Read `references/template-latex-theory.tex` for a full proof walkthrough. For a brief note, reuse only the necessary preamble and environments. The following patterns are useful when the requested document needs the corresponding sections:
 - Opening overview states the question, answer, and ordered proof strategy
 - Setup holds primitives and maintained assumptions only
 - Each results section defines its objects at first use, motivates and states the theorem, then explains the supporting lemmas' roles
-- The assembly proof precedes shared inputs and the supporting lemmas, with one logical move per bullet
+- A proof strategy explains why the major steps suffice; the proof develops those steps as top-level bullets with nested justifications
+- When supporting lemmas are needed, first show how they establish the main result, then give their statements and layered proofs
 - Closing discussion identifies the result's scope, maintained assumptions, and remaining gaps
 - Optional appendix for alternative proofs or extensions
 
@@ -95,18 +80,19 @@ Read `references/template-latex-theory.tex` for the proof walkthrough structure.
 
 ## Step 7: Write the Summary (body first, opening overview last)
 
-The document is a self-contained proof walkthrough. Use a standalone article class with theorem environments. Do not use the empirics template.
+Use a standalone article class. Include theorem environments when the document contains formal statements or proofs. Match the requested length and preserve the sections outside an authorized edit.
 
-### House style (the user's standing rules — apply to every theory summary)
+### Proof-writing guidance
 
-These were established line-by-line with the user (2026-07-30, `summary-cs_floor`
-revision round) and are non-negotiable defaults. Each carries its reason — the
-reasons matter, because they tell you how to apply the rule in a new situation.
+Use these defaults where relevant to the requested deliverable. The shared [research reasoning conventions](../../../rules/standalone-conventions.md#research-reasoning) apply to every length. A brief note can omit the full walkthrough's section structure, while its claims still need accurate hypotheses and support.
 
-1. **One logical point per line.** Proof bodies are `itemize`/`enumerate` with one
-   move, one claim, or one case per bullet; sub-bullets for case splits (but avoid
-   depth > 3 — deep nesting recreates the confusion bullets exist to kill). The
-   user audits line-by-line; packed prose hides the logical skeleton.
+1. **Major steps above their justifications.** Use `itemize`/`enumerate` to
+   organize the proof in layers. The top level contains the few substantive
+   steps and says what each achieves. Nested bullets explain why each step is
+   true: assumptions, cited results, calculations, and case checks. Use a
+   further level when a justification itself needs an argument. Usually two
+   or three levels suffice; give a long subargument a named lemma rather than
+   burying it in deep indentation. Keep one logical point per bullet.
 2. **Every summation/product index carries explicit bounds.** Never `\sum_k`;
    write `\sum_{k=1}^{K}`, `\sum_{j=k}^{K}`, or an explicit index set
    `\sum_{S \in \pi}`. A bare index leaves the range ambiguous.
@@ -118,49 +104,54 @@ reasons matter, because they tell you how to apply the rule in a new situation.
 4. **Definition at first use.** Define each object (and each welfare aggregate) at
    the top of the section that first uses it — not in a global setup. The setup
    holds only primitives and the market description.
-5. **Minimal notation; state only what you use.** A symbol earns its place only if
-   used pervasively (rule of thumb: a symbol used in ≤ 5 places is written out
-   inline instead). Don't state a general form of a lemma if only a special case
-   is ever cited — and conversely, don't scope a lemma narrower than its uses.
-   Audit both directions before finalizing: "is this fact ever used?" and "is
-   anything used but unstated?"
-6. **Registered/benchmark notation in statements; raw computation in proofs.**
-   Statements speak the project's named quantities; fractions and algebra appear
-   only inside proofs where the computation needs them.
+5. **Established notation; state only what you use.** Follow the shared notation
+   policy. Keep an established symbol even when this note uses it only a few
+   times. Include the facts the argument uses and state hypotheses broad enough
+   to cover their actual uses.
+6. **Established quantities and explicit computations.** Use the project's
+   existing quantities in statements. Show primitive expressions and algebra
+   where they clarify a statement or justify a proof step.
 7. **Argument-explicit functions in statements.** Objects that depend on a
    configuration are written as functions of it in statements (e.g.
    `CS(b_1,...,b_K)`), with a one-sentence convention allowing the bare symbol
    inside proofs where the configuration is fixed. This answers "surplus *of
    what*?" inside every statement.
-8. **Motivation prose before each theorem, paper-style.** A short flowing
-   paragraph (not bullets) giving the economics: the forces at play, why the
-   result should hold, and its message in words — so the formal statement lands
-   as a crystallization, not a formula to decode.
-9. **Strategy paragraph after the statement, with per-lemma roles.** Name the
-   proof's parts and give each supporting lemma's role in one clause (bulleted if
-   3+ parts). Flag where the crux is and where each key assumption first enters.
-10. **Assembly before lemmas.** Give the main theorem's proof (the assembly,
-    forward-citing the lemmas) *before* the lemmas, so each lemma arrives with
-    its role already fixed. Shared inputs used by several lemmas (e.g. a system
-    of first-order conditions) get their own numbered display before the lemmas
-    — never buried inside one lemma's proof and silently used by another.
-11. **Every claim computes, cites, or justifies.** No bullet may assert. Each
-    carries its two-line reason, a `\ref`/`\eqref`, or an explicit computation.
-    Case analyses must be exhaustive and each case must carry the *correct*
-    reason (watch for cases that share a conclusion but need different
-    arguments).
+8. **Motivate results where useful.** Before a theorem, explain its economic
+   point in prose. Keep one main idea per paragraph. A short proof note may
+   need only a sentence; a standalone result needs enough context to make its
+   significance clear.
+9. **Explain why the strategy succeeds.** After the statement, give a short
+   overview of the major steps and explain how their conclusions combine to
+   prove it. For example, say why an upper bound plus a feasible choice
+   attaining it establishes optimality. Merely listing "bound, construct,
+   conclude" is insufficient. Then expand each step with nested justifications.
+   Identify each supporting lemma's role and where key assumptions enter.
+10. **Show the assembly before supporting lemmas when lemmas are needed.**
+    Give the main proof first, forward-citing the lemmas, so their roles are
+    clear before their details. A direct proof can keep the justifications
+    under its major steps without inventing extra lemmas. Shared inputs used
+    by several lemmas get a numbered display before those lemmas, rather than
+    being buried in one lemma's proof and silently used by another.
+11. **Every claim computes, cites, or justifies.** Give a reason, a
+    `\ref`/`\eqref`, or a computation for each substantive move. Case analyses
+    must cover the claim's domain, including cases that share a conclusion but
+    require different arguments.
 12. **Self-contained: internal citations only.** Cite the source paper by
     equation/observation number; never cite project-internal ledgers or notes a
     fresh reader cannot see. If an external result is needed, either prove it
     inline in two lines or reproduce its statement.
-13. **Layout:** each section after the first starts on a new page (`\clearpage`);
-    the main theorem's proof may also start a fresh page if its section is long.
-    Figures are non-floating (`center` or `[H]`), placed where the text needs
-    them, sized so they never occupy a page alone; prefer no caption when panel
-    titles carry the message.
+13. **Separate ideas on the page.** Start major sections on fresh pages,
+    including in brief notes with distinct sections. Use one main idea per
+    paragraph and visible space between paragraphs, major steps, and nested
+    bullets. Keep figures non-floating and with their explanations, never
+    isolated on a page. Let long proofs continue at sensible step boundaries;
+    do not shrink text, eliminate list spacing, or force every small substep
+    onto its own page.
 14. **No meta-commentary in the text.** Never explain *why the document* does
     something ("G is needed only because..."); just do it. Redundant restatements
     (saying one fact two ways) are deleted — state the strongest true form once.
+
+The following phases describe a full walkthrough. Use only the parts needed for a brief note or equation sheet.
 
 **Phase A — Overview:**
 - State the question precisely
@@ -168,52 +159,72 @@ reasons matter, because they tell you how to apply the rule in a new situation.
 - Roadmap of the document sections
 
 **Phase B — Setup (primitives only):**
-- Model primitives and the market description, as bullets (house rule 1)
+- Model primitives and the market description, as bullets (rule 1)
 - The maintained assumption, stated once with what is proved vs. maintained
 - NO welfare aggregates, no benchmarks, no derived objects — those are defined
-  at first use in their sections (house rule 4)
+  at first use in their sections (rule 4)
 
 **Phase C — Results (one section per step/theorem):**
 
-For each theorem, in this order (house rules 8–10):
+For an extended theorem walkthrough, a useful order is (rules 8–10):
 1. Definitions the section needs (first use)
 2. Motivation prose (economics, in words)
-3. The theorem, with full inline hypotheses (house rule 3)
-4. Strategy paragraph with per-lemma roles
-5. The assembly proof (forward-citing lemmas)
-6. Shared inputs as numbered displays, then the lemmas with bulleted proofs
+3. The theorem, with full inline hypotheses (rule 3)
+4. Strategy explaining why the major steps jointly imply the result
+5. Layered proof: major steps above their justifications
+6. When separate lemmas are useful, show their roles in the main proof first,
+   then shared inputs as numbered displays and the lemmas with layered proofs
 
 - Cross-reference via `\ref{}`/`\eqref{}` — every dependency is a visible link
-- **Notation:** use model primitives directly in equations rather than introducing shorthand notation. If you notice a recurring expression that would benefit from shorthand, suggest it to the user — they can approve it and register it as project notation. Do not introduce shorthand on your own.
 
-**Proof format.** Two shapes, chosen per proof (house rule 1 governs both):
+**Proof format.** Use the same layered structure for direct proofs and proofs
+assembled from lemmas:
 
-- **Bulleted proofs** (the default): `itemize` with one move per bullet; each
-  bullet computes, cites (`\ref`/`\eqref`), or carries its two-line reason.
-  `enumerate` when the moves are a named sequence; sub-bullets for case splits.
-- **Derivation chains** (for the key regrouping/identity steps): an `align*`
-  block with one equality per line and the justification alongside via
-  `&& \text{...}` — "the definition", "insert eq. (1)", "the swap: who pays for
-  slab j?". Expand the key step in full even when a compressed one-liner would
-  verify; the chain teaches, the one-liner only certifies.
+- **Strategy:** explain why the conclusions of the major steps are sufficient
+  for the theorem. The reader should understand the route before the details.
+- **Top level:** one bullet per major step, stating its claim and its role in
+  the strategy. Use `enumerate` when named step numbers help cross-references.
+- **Lower levels:** nest each reason, computation, supporting lemma, or case
+  beneath the claim it establishes. A label such as "by monotonicity" also
+  needs the applicable conditions and the resulting implication.
+- **Derivation chains:** put an `align*` block inside the supporting bullet
+  where the calculation is needed, with justifications alongside substantive
+  equalities. The chain supports that step rather than replacing the strategy.
 
-The goal is a proof that *teaches*, not just verifies. A reader should finish able to replicate the argument on a different problem. Every step is a decision point; the format makes those decisions explicit.
+A reader should be able to scan the major steps to understand why the proof
+works, then descend into a chosen step to check its justification. Keep short
+arguments short while making these logical levels visible.
 
 ```latex
-% Pattern for a bulleted proof (the default):
+% State the strategy first: why do these steps jointly establish the claim?
+\noindent\textbf{Proof strategy.}
+[Explain how the conclusions of the major steps imply the theorem.]
+
 \begin{proof}
+\leavevmode\par % Keep the proof heading above the bullet tree.
 \begin{itemize}
-  \item [one move: a computation, or a claim with its two-line reason];
-  \item By \eqref{eq:X}, [next move];
-  \item [case split:]
+  \item \textbf{[First major step and its role.]}
     \begin{itemize}
-      \item [case A, with its own correct reason];
-      \item [case B, with its own correct reason]. \qedhere
+      \item [Reason or supporting result, with its conditions checked.]
+      \item [Calculation or implication establishing this step.]
+    \end{itemize}
+  \item \textbf{[Second major step and its role.]}
+    \begin{itemize}
+      \item [How the first step and a current assumption apply.]
+      \item [Why the relevant cases exhaust the domain.]
+        \begin{itemize}
+          \item [Case A and its justification.]
+          \item [Case B and its justification.]
+        \end{itemize}
+    \end{itemize}
+  \item \textbf{[Conclude the claim.]}
+    \begin{itemize}
+      \item [Explicitly combine the preceding conclusions.] \qedhere
     \end{itemize}
 \end{itemize}
 \end{proof}
 
-% Pattern for a key derivation chain:
+% A key derivation chain belongs inside the bullet it justifies:
 \begin{align*}
 X &= [\text{first form}]
   && \text{the definition; [what enters here]}\\
@@ -225,9 +236,9 @@ X &= [\text{first form}]
 ```
 
 **Key principles:**
-- **Derive forward** — start from the object in question and work toward the conclusion. Never state the answer first and verify backward.
-- **Every algebraic step must be justified** — name the rule, check the conditions, explain the content. Do not skip "obvious" steps.
-- **Proofs should be detailed and crystal clear.** Every step should be expanded enough that a reader with fresh eyes can follow without filling in gaps. Do not compress proofs for brevity — clarity is the priority. If a step takes half a page, that's fine.
+- **Derive forward** — after stating the result, develop the argument from definitions and assumptions toward the conclusion. Explain how each step advances the argument.
+- **Justify substantive transformations** — name the rule and check its conditions. Routine algebra can be combined when the justification remains clear.
+- **Keep proofs concise, complete, and visibly layered.** A reader should be able to reproduce the argument. Expand the key steps, assumptions, and boundary cases in the appropriate lower layer. Remove repetition while retaining readable spacing and the explanation of why the strategy succeeds.
 - **Flag the hard steps.** If a step is the intellectual crux (not just bookkeeping), say so in the commentary. This helps the reader distinguish routine algebra from the moves that carry real mathematical content.
 
 **Phase D — Discussion:**
@@ -242,32 +253,40 @@ X &= [\text{first form}]
 
 ### Assemble
 
-- No `\outdir` needed (no external figures/tables to reference)
-- Assemble in document order: opening overview, Setup, one results section per step/theorem, closing discussion, optional Appendix
+- When including external figures or tables, use paths that resolve from the document directory and follow the [file I/O guide](../../../rules/standalone-file-io.md).
+- For a full walkthrough, assemble the overview, setup, results, discussion, and any useful appendix. For a brief document, assemble only the requested material and the context needed to interpret it.
 
 ### Checklist
 
+Apply the items relevant to the requested document. Formal statement and proof checks apply whenever those elements are included.
+
 - [ ] Question and answer stated upfront in the opening overview
-- [ ] Every proof bulleted, one move per bullet; key identities as align chains
-      with per-line justifications (house rules 1, 11)
-- [ ] All summation/product indices carry explicit bounds (house rule 2)
+- [ ] Proof strategy explains why the major steps jointly imply the claim;
+      top-level bullets show those steps and nested bullets justify them
+      (rules 1, 9, 11)
+- [ ] Key identities sit under the step they justify, with substantive
+      transformations explained
+- [ ] All summation/product indices carry explicit bounds (rule 2)
 - [ ] Every statement carries its full hypotheses inline; no ambient scope
-      (house rule 3)
+      (rule 3)
 - [ ] Every object defined at first use; setup holds primitives only
-      (house rule 4)
-- [ ] Notation audit run both directions: nothing stated-but-unused, nothing
-      used-but-unstated; single-use symbols inlined (house rule 5)
-- [ ] Registered notation in statements, raw computation in proofs; functions
-      argument-explicit in statements (house rules 6–7)
-- [ ] Each theorem: motivation prose → statement → strategy with per-lemma
-      roles → assembly → lemmas; shared inputs as numbered displays
-      (house rules 8–10)
+      (rule 4)
+- [ ] Established notation retained, all objects used are defined, and facts
+      needed by the argument are stated (rule 5)
+- [ ] Established quantities and explicit computations where needed; function
+      arguments are clear in statements (rules 6–7)
+- [ ] Each result has the context it needs, a statement, a sufficient strategy,
+      and a layered proof; separate lemmas appear only when useful, with their
+      roles explained first and shared inputs stated before their use
+      (rules 8–10)
 - [ ] No external/internal-ledger citations a fresh reader cannot resolve
-      (house rule 12)
-- [ ] Sections start on new pages; figures never occupy a page alone
-      (house rule 13)
-- [ ] No meta-commentary; no redundant restatements (house rule 14)
+      (rule 12)
+- [ ] Major sections start on separate pages; each paragraph has one main
+      idea, nested lists have readable spacing, and figures stay with their explanations
+      (rule 13)
+- [ ] No meta-commentary; no redundant restatements (rule 14)
 - [ ] Discussion: what drives the result, what it does NOT use, remaining gaps
 - [ ] Opening overview written last, reflects actual findings
 - [ ] Document compiles without errors; auxiliary files cleaned up
-- [ ] `/review-summary` Mode B passes with no CRITICAL or MAJOR issues
+- [ ] Included claims verified using Step 10 of `SKILL.md`, with unresolved
+      claims identified explicitly

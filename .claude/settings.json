@@ -63,7 +63,6 @@
       "Bash(pdf2svg *)",
       "// pdftk: split/merge PDFs (used to chunk large papers)",
       "Bash(pdftk *)",
-      "// gs (ghostscript): PDF compression and conversion",
       "Bash(gs *)",
       "// --- Web access ---",
       "// WebSearch: search the web for academic papers and information",
@@ -92,31 +91,8 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python3 \"$CLAUDE_PROJECT_DIR\"/.claude/hooks/files-protection.py",
+            "command": "python3 \"$CLAUDE_PROJECT_DIR\"/.agents/hooks/files-protection.py",
             "timeout": 5
-          }
-        ]
-      }
-    ],
-    "PostToolUse": [
-      {
-        "matcher": "Write|Edit",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "python3 \"$CLAUDE_PROJECT_DIR\"/.claude/hooks/reminder-verify.py",
-            "timeout": 5
-          }
-        ]
-      }
-    ],
-    "Stop": [
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "python3 \"$CLAUDE_PROJECT_DIR\"/.claude/hooks/reminder-log.py",
-            "timeout": 10
           }
         ]
       }

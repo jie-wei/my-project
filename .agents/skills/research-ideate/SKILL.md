@@ -1,121 +1,43 @@
 ---
 name: research-ideate
-description: Conversational interview to formalize a research idea into a structured specification
+description: Develop a research idea through focused conversation about theory, empirics, or both. Use to clarify a puzzle, model, argument, or research design; write a specification only when requested.
 disable-model-invocation: true
-argument-hint: "[brief topic or 'start fresh']"
+argument-hint: "[idea, model, empirical question, or 'start fresh']"
 allowed-tools: ["Read", "Write"]
 ---
 
-# Research Interview
+# Develop a Research Idea
 
-Conduct a structured interview to help formalize a research idea into a concrete specification.
+Help clarify the researcher's question and what would establish an answer. Adapt to what is already known instead of following a fixed interview.
 
-**Input:** `$ARGUMENTS` — a brief topic description or "start fresh" for an open-ended exploration.
+## Conversation
 
----
+Read the supplied context and relevant notes first. Preserve the latest formulation and notation. If the idea is already clear, analyze or formalize it directly; do not require an interview.
 
-## How This Works
+Ask focused questions in plain text when an answer is needed to move forward. Build on the user's responses, explain why a consequential uncertainty matters, and avoid repeating settled questions. There is no target number of questions or exchanges.
 
-This is a **conversational** skill. Instead of producing a report immediately, you conduct an interview by asking questions one at a time, probing deeper based on answers, and building toward a structured research specification.
+Infer whether the work is theoretical, empirical, or mixed, and choose relevant questions:
 
-**Do NOT use AskUserQuestion.** Ask questions directly in your text responses, one or two at a time. Wait for the user to respond before continuing.
+- **Theory:** What are the primitives, timing, information, and solution concept? What claim or mechanism is conjectured? Which assumptions carry the result? What simpler case, proof argument, or counterexample would clarify it?
 
----
+- **Empirics:** What quantity or pattern is being studied? Which data and measurements are available? What design supports the intended inference, and what could undermine it? Ask about treatment, controls, or natural experiments only when a causal question calls for them.
 
-## Interview Structure
+- **Mixed work:** What does the model establish, and what remains to be tested or estimated? What observation would distinguish the proposed mechanism from alternatives?
 
-### Phase 1: The Big Picture (1-2 questions)
-- "What phenomenon or puzzle are you trying to understand?"
-- "Why does this matter? Who should care about the answer?"
+Use these as prompts, not a checklist. Ask about motivation, contribution, or related work when they remain unresolved and matter to the current question. Do not require a dataset for a theory project.
 
-### Phase 2: Theoretical Motivation (1-2 questions)
-- "What's your intuition for why X happens / what drives Y?"
-- "What would standard theory predict? Do you expect something different?"
+## Develop the Argument
 
-### Phase 3: Data and Setting (1-2 questions)
-- "What data do you have access to, or what data would you ideally want?"
-- "Is there a specific context, time period, or institutional setting you're focused on?"
+Offer substantive reasoning alongside questions. Evaluate weak assumptions and alternative explanations directly and respectfully. Distinguish proved results, maintained assumptions, conjectures, and empirical expectations.
 
-### Phase 4: Research Design (1-2 questions)
-- "What is your research design? Is there a natural experiment, randomized assignment, or other source of variation you can exploit?"
-- "What is the biggest threat to the validity of your findings?"
+When a proof or derivation is useful, explain why the major steps jointly establish the result, then justify each step in nested bullets. Follow the shared communication conventions.
 
-### Phase 5: Expected Results (1-2 questions)
-- "What would you expect to find? What would surprise you?"
-- "What would the results imply for policy or theory?"
+Stop asking questions once the current request can be answered. Give a concise synthesis of what is established, what remains open, and the next useful step.
 
-### Phase 6: Contribution (1 question)
-- "How does this differ from what's already been done? What's the gap you're filling?"
+## Saved Specifications
 
----
+Keep the discussion and synthesis in chat unless the user requests a document. Invoking this skill alone does not authorize an automatic specification file.
 
-## After the Interview
+For a requested write-up, include only relevant material: the question and motivation, model or empirical setting, assumptions, proposed argument or design, existing results, and open issues. Include data and identification sections only when applicable.
 
-Once you have enough information (typically 5-8 exchanges), produce a **Research Specification Document**:
-
-```markdown
-# Research Specification: [Title]
-
-**Date:** [YYYY-MM-DD]
-**Researcher:** [from conversation context]
-
-## Research Question
-
-[Clear, specific question in one sentence]
-
-## Motivation
-
-[2-3 paragraphs: why this matters, theoretical context, policy relevance]
-
-## Hypothesis
-
-[Testable prediction with expected direction]
-
-## Research Design
-
-- **Method:** [e.g., Randomized experiment, Difference-in-differences, Regression discontinuity, Simulation, Mixed methods]
-- **Treatment / variation:** [What varies]
-- **Comparison group:** [Control or counterfactual]
-- **Key assumption:** [What must hold for validity]
-- **Robustness checks:** [Sensitivity analyses, alternative specifications, etc.]
-
-## Data
-
-- **Primary dataset:** [Name, source, coverage]
-- **Key variables:** [Treatment, outcome, controls]
-- **Sample:** [Unit of observation, time period, N]
-
-## Expected Results
-
-[What the researcher expects to find and why]
-
-## Contribution
-
-[How this advances the literature — 2-3 sentences]
-
-## Open Questions
-
-[Issues raised during the interview that need further thought]
-```
-
----
-
-## Output Location
-
-Determine the save path:
-1. Check if recent context is inside `exploration/[name]/`.
-2. If YES: save to `docs/exploration/[name]/research_spec_[sanitized_topic].md`.
-3. If NO: save to `docs/core/research_spec_[sanitized_topic].md`.
-4. Create the directory if it does not exist.
-
----
-
-## Important
-
-- **CONVERSATIONAL SKILL.** Do NOT produce a report immediately. Ask questions one at a time.
-- **Do NOT use AskUserQuestion tool.** Ask questions directly in your text responses.
-- **Session logging.** This skill involves many exchanges. The reminder-log hook fires at 15 responses. Update the session log with the interview topic and key decisions between phases.
-- **Be curious, not prescriptive.** Your job is to draw out the researcher's thinking, not impose your own ideas.
-- **Probe weak spots gently.** If the research design sounds fragile, ask "What would a skeptic say about...?" rather than "This won't work because..."
-- **Build on answers.** Each question should follow from the previous response.
-- **Know when to stop.** If the researcher has a clear vision after 4-5 exchanges, move to the specification. Don't over-interview.
+Use the requested destination or active variant's notes folder. For a new direction without a destination, use `docs/exploration/[variant]/research_spec_[topic].md`, choosing descriptive snake_case names. Use `docs/core/` only when the work belongs to the established core. Preserve unresolved questions as open issues rather than filling gaps with invented answers.

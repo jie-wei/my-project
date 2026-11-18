@@ -1,6 +1,6 @@
 ---
 name: review-literature-comparison
-description: Literature review that compares existing work against our paper's thesis. Use when the user asks to survey literature relative to our idea, find related work, check novelty of results, position our paper, or says "compare with literature", "how does our paper relate to X", "what's the related literature on X". Also triggers when the user wants to compare their paper's results against existing work. Has a "deepen" mode (triggers on "deepen", "enrich entries") and a "merge" mode (triggers on "merge", "add new papers"). This is the COMPARISON skill — it reads the literature through the lens of our paper's thesis. For a neutral, thesis-free understanding of what the literature contains, use /review-literature-comparison-synoptic instead.
+description: Literature review that compares existing work against our paper's thesis. Use when the user asks to survey literature relative to our idea, find related work, check novelty of results, position our paper, or says "compare with literature", "how does our paper relate to X", "what's the related literature on X". Also triggers when the user wants to compare their paper's results against existing work. Has a "deepen" mode (triggers on "deepen", "enrich entries") and a "merge" mode (triggers on "merge", "add new papers"). This is the COMPARISON skill — it reads the literature through the lens of our paper's thesis. For a neutral, thesis-free understanding of what the literature contains, use /review-literature-synoptic instead.
 disable-model-invocation: true
 argument-hint: "[topic, paper title, or research question]"
 ---
@@ -16,11 +16,17 @@ Conduct a structured literature search and synthesis on the given topic.
 ## Mode Detection
 
 Parse `$ARGUMENTS`:
-- **`deepen`** → run the Deepen workflow (enriches existing `[UNSUMMARIZED]` entries using `/read-paper` summaries)
-- **`merge`** → run the Merge workflow (integrates newly summarized papers into an existing literature review)
+- **`deepen`** → run the Deepen workflow (enriches existing entries from paper summaries or original full text)
+- **`merge`** → run the Merge workflow (integrates newly read papers into an existing literature review)
 - **Anything else** → standard literature review (Steps 1-7 below)
 
 ---
+
+## Sources
+
+Use an existing individual paper summary when available. Otherwise read the original PDF or full text directly, following the [PDF guide](../../rules/standalone-pdf.md). Match the paper and version, read the sections supporting each substantive claim, and retain page, section, or result references. A separate summary file is optional.
+
+Use the available search and page/PDF-reading tools in either client; `WebSearch` and `WebFetch` below name Claude's equivalents. If only an abstract is accessible, label the entry as preliminary and retain `[UNSUMMARIZED]`. Do not infer detailed assumptions or theorems from an abstract. Report unavailable sources without blocking work on accessible papers.
 
 ## Steps (Standard Review)
 
@@ -59,7 +65,7 @@ For a literature with 30+ papers, building the comparison review in a single pas
 
 **Step 1 — Sequential: Establish comparison target.** Read our paper's thesis. This must happen first — every subsequent step needs it.
 
-**Step 2 — Parallel: Per-paper extraction.** Spawn one agent per paper (or per batch of 5-10 papers). Each agent reads one `summary-*.md` file and extracts: model, main contribution, key finding, and *connection to our thesis*. These are independent once the thesis is known. Each agent writes its output to a temp file.
+**Step 2 — Parallel: Per-paper extraction.** Spawn one agent per paper (or per batch of 5-10 papers). Each agent reads one paper's summary or original full text and extracts: model, main contribution, key finding, and *connection to our thesis*. These are independent once the thesis is known. Each agent writes its output to a temp file.
 
 **Step 3 — Sequential: Assembly.** The main agent reads all extraction outputs and assembles: group papers by dimension (organized around our claims), identify closest predecessors, assign papers to themes. This requires seeing all papers together — it cannot be parallelized.
 
@@ -103,27 +109,22 @@ Read the bundled template at `templates/template-summary-literature.md` (relativ
 [~10-15 lines. What they do. What they miss. Why the comparison matters.]
 ```
 
-**Summary links are mandatory.** Every paper entry — in Section 4, Section 5, Section 6, and Section 8 — must include a `[Summary](summary-year-author.md)` link if a corresponding summary file exists in `docs/literature/`. Before writing entries, scan `docs/literature/summary-*.md` to build a list of available summaries. The link goes right after the author-year-journal citation: `**Author (Year, Journal)** — [Summary](summary-year-author.md)`. Papers without a summary file get no link (and keep the `[UNSUMMARIZED]` tag). The reason: clicking through to the full summary is one of the most common reader actions — a missing link forces them to hunt for the file manually.
+**Summary links are mandatory.** Every paper entry — in Section 4, Section 5, Section 6, and Section 8 — must include a `[Summary](summary-year-author.md)` link if a corresponding summary file exists in `docs/literature/`. Before writing entries, scan `docs/literature/summary-*.md` to build a list of available summaries. The link goes right after the author-year-journal citation: `**Author (Year, Journal)** — [Summary](summary-year-author.md)`. For a paper without a summary file, link the actual PDF or full-text source as `[Paper](...)` and cite the relevant pages or results. Its reading status depends on the evidence incorporated, not on whether a separate summary exists. The reason: clicking through to the full summary is one of the most common reader actions — a missing link forces them to hunt for the file manually.
 
 **Anti-patterns to avoid:**
 - Do NOT repeat the framework/thesis in every dimension's "reading through our lens" paragraph — apply it, don't restate it
 - Do NOT mix per-paper detailed entries into the dimensions section — keep dimensions concise (1-2 lines per paper), save detail for section 5 (predecessors) or individual summary files
-- Do NOT include paper-planning material (contributions, specific research questions, "extremal information structures to discover") — that belongs in `docs/quality_reports/plans/`
+- Keep proposed contributions and future research questions in the project's research notes.
 - Do NOT omit summary links on paper entries when the summary file exists — every entry must link to its summary
 
 ### Tags
 
 Every paper entry starts with **two tags** by default:
 
-- **`[UNSUMMARIZED]`** — the literature review entry has not been enriched with a deep reading. Removed only by `/review-literature-comparison deepen` after it reads the corresponding `summary-*.md` file produced by `/read-paper` and updates the entry.
-- **`[UNVERIFIED]`** — citation details come from LLM memory, not a verified source. Remove only after confirming via WebSearch/WebFetch (verified URL, correct journal/volume/pages) or if the entry already exists in `paper/references.bib`.
+- **`[UNSUMMARIZED]`** — the entry has not yet been grounded in a detailed reading. Remove it after reading a substantive summary or the original paper and updating the entry with supported claims and source locations. This can happen during the initial review, deepening, or merging.
+- **`[UNVERIFIED]`** — citation details have not been checked. Remove only after confirming them against a reliable bibliographic source or a verified project bibliography entry.
 
-**Tag lifecycle for `[UNSUMMARIZED]`:**
-1. `/review-literature-comparison` adds the tag when creating the entry
-2. User downloads the PDF and runs `/read-paper` → produces a `summary-*.md` file (tag stays)
-3. User runs `/review-literature-comparison deepen` → reads the summary, enriches the entry, replaces `[UNSUMMARIZED]` with a clickable link to the summary file
-
-Papers already in `paper/references.bib` can drop `[UNVERIFIED]`. Papers with a verified URL from WebSearch can drop `[UNVERIFIED]`. Neither tag should be removed just because the information *seems* correct.
+Link an existing summary wherever the paper appears. If there is no summary, use a link to the paper itself. Do not create a separate summary solely to clear a tag, and do not clear either tag merely because a file exists or the information seems correct.
 
 ### Thematic Organization
 
@@ -145,58 +146,40 @@ See template for structure.
 
 ## Deepen Workflow
 
-When the user says `deepen`, "enrich the lit review", "update entries with summaries", or similar — this mode upgrades literature review entries using the deep summaries produced by `/read-paper`.
+Use this mode to improve existing entries with a detailed reading of summaries or original papers.
 
-The idea: initial entries are written from abstracts and LLM memory (shallow). After `/read-paper` produces a `summary-*.md` file, you can go back and enrich the entry with real understanding — better descriptions, more accurate "Relevance to our paper" assessments, and updated thematic synthesis.
+1. **Find the requested review and entries.** Look in `docs/literature/summary-literature-comparison*.md`, including legacy `review-literature-comparison*.md` or `lit_review_*.md` files under the relevant notes folder.
 
-### Steps
+2. **Find usable sources.** Look for matching `summary-*.md` files, local PDFs, supplied links, or accessible full text. Check paper identity and version. Read the original paper when a summary is absent or does not support a claim that matters.
 
-1. **Find literature review files** — scan for entries with `[UNSUMMARIZED]` tags in:
-   - `docs/literature/summary-literature-comparison*.md`
-   - `docs/literature/review-literature-comparison*.md` (legacy naming)
-   - `docs/core/lit_review_*.md`
-   - `docs/exploration/**/lit_review_*.md`
+3. **Proceed within the requested scope.** Use available sources without requiring a separate paper-reading command or another approval. Report entries whose necessary sources remain unavailable and keep their preliminary tags.
 
-2. **Find matching summary files** — for each `[UNSUMMARIZED]` entry, search for a corresponding `summary-{year}-{author}.md` file (match by author name and year). Check these locations:
-   - The directory where the paper's PDF lives (most common — `/read-paper` places summaries alongside PDFs)
-   - `docs/literature/` and its subdirectories
-   - The project root's `paper/` directory
+4. **Update each entry from the evidence.**
+    - Re-read the comparison target if it is no longer in context.
+    - Ground the contribution, findings, and comparison in specific assumptions, sections, or numbered results.
+    - Link the existing summary, or link the original paper and identify the supporting pages or results.
+    - Remove `[UNSUMMARIZED]` only after the entry has been enriched. Keep `[UNVERIFIED]` until citation details are checked.
 
-3. **Report what's available** — show the user which `[UNSUMMARIZED]` entries have summary files ready, and which don't (those need `/read-paper` first). Let the user confirm which entries to deepen, or proceed with all that have summaries.
-
-4. **For each entry with a summary file:**
-   a. Read the `summary-*.md` file — focus on the story summary, narrative tree, and core assessment.
-   b. Re-read the comparison target (Step 2 of the standard review) if not already in context.
-   c. **Update the entry:**
-      - Rewrite **Main contribution** and **Key finding** based on actual paper content, not abstract-level guesses.
-      - Rewrite **Relevance to our paper** with specific, grounded comparisons — now that you've read the actual arguments, you can say precisely how they relate.
-      - Add a **Summary** field with a link to the summary file: `**Summary:** [Full summary](relative/path/to/summary-year-author.md)`
-   d. **Remove `[UNSUMMARIZED]`** from the entry heading.
-
-5. **Update thematic sections** — with deeper understanding of several papers, the thematic groupings and synthesis paragraphs may need revision. Re-read the themes and update if the deep readings reveal connections or tensions the shallow pass missed.
-
-6. **Update gaps and next steps** — deep readings often reveal new gaps or close ones that seemed open from the abstract.
+5. **Update the synthesis.** Revisit themes, closest-predecessor assessments, gaps, and index entries when the reading changes the comparison. Keep the source links and tags consistent wherever the same paper appears.
 
 ### Entry format after deepening
 
 ```markdown
-### [Author (Year)](URL) — Short Title `[UNVERIFIED]`
+### Author (Year, Journal) — Short Title
 
-- **Summary:** [Full summary](relative/path/to/summary-year-author.md)
-- **Publication:** *Journal Name*, vol. X(Y), pp. Z
+- **Source:** [Paper](actual-source-url-or-relative-path), Section X / Proposition Y
+
 - **Main contribution:**
-  - [Updated point 1 — grounded in actual paper content]
-  - [Updated point 2 — with specific theorem/proposition numbers]
-- **Method:** [Updated if needed]
+    - [Claim supported by the source]
+
 - **Key finding:**
-  - [Updated finding 1 — specific, with result numbers]
-  - [Updated finding 2 — if applicable]
+    - [Result, with its necessary assumptions and source location]
+
 - **Relevance to our paper:**
-  - [Updated connection 1 — names our specific results]
-  - [Updated connection 2 — precise comparison grounded in both papers]
+    - [Precise comparison grounded in both papers]
 ```
 
-Note: `[UNSUMMARIZED]` is gone, replaced by the clickable Summary link. `[UNVERIFIED]` stays until citation details are independently confirmed.
+Use a `Summary` link instead when a summary file exists. Retain any unverified-citation tag.
 
 ---
 
@@ -210,9 +193,9 @@ When the user says `merge`, "add new papers", "integrate these into the review",
 
 ### Steps
 
-1. **Identify new papers.** Find summary files in `docs/literature/` that are *not* referenced anywhere in the literature review file. Compare the set of `summary-*.md` files against all summary links in the review.
+1. **Identify new papers.** Start with the papers the user supplied or requested. If asked to scan the local collection, check summaries and original papers in `docs/literature/`. Compare paper identities and versions against existing review entries, rather than treating a missing summary link as a new paper.
 
-2. **Triage each paper.** For each new paper, read its summary (Story Summary + Core Assessment) and classify it:
+2. **Triage each paper.** For each new paper, read its summary or original full text and classify it:
    - **Dimension paper** → goes in section 4 (which subsection?) and section 8 (mirror)
    - **Formal tool** → goes in section 6 and section 8's "Formal Tools" subsection
    - **Closest predecessor** → goes in section 5 (detailed positioning)
@@ -238,7 +221,7 @@ When the user says `merge`, "add new papers", "integrate these into the review",
 
    **Parallelization guidance.** Think in terms of information independence:
 
-   **Step A — Parallel: Per-paper triage.** Spawn one agent per new paper (or per batch). Each agent reads the paper's summary + our thesis and classifies it: which dimension? closest predecessor? formal tool? Each writes its classification to a temp file.
+   **Step A — Parallel: Per-paper triage.** Spawn one agent per new paper (or per batch). Each agent reads the paper's summary or original full text + our thesis and classifies it: which dimension? closest predecessor? formal tool? Each writes its classification to a temp file.
 
    **Step B — Sequential: Merge plan.** The main agent reads all classifications, builds the merge plan (which papers go where), and presents it to the user.
 
@@ -248,12 +231,12 @@ When the user says `merge`, "add new papers", "integrate these into the review",
 
    **Step E — Sequential: Revisit Sections 1-3.** After merging new papers, re-read Sections 1 (Thesis), 2 (Framework), and 3 (Scope). These are high-level summaries that can only be written well after understanding the full literature. New papers may shift the framing, broaden the scope, or refine the thesis. Update as needed.
 
-   If using cloud sync (Dropbox), all agents write to temp files; the main agent merges at the end. Provide each agent with: (a) the summary file(s) for its papers, (b) the merge plan, (c) our thesis.
+   If using cloud sync (Dropbox), all agents write to temp files; the main agent merges at the end. Provide each agent with: (a) the summary or original-source file(s) for its papers, (b) the merge plan, (c) our thesis.
 
 5. **Verify consistency.** After all edits, run through this checklist. These checks catch the most common failure mode — sections drifting out of sync after incremental additions:
    - Every subsection in section 8 should correspond to a subsection in section 4 (same names, same numbering). If you added a new 4.N, section 8 must have a matching subsection.
    - Every paper in section 4 should appear in section 8, and vice versa
-   - No `[UNSUMMARIZED]` tags should remain on papers that have summary files
+   - Remove `[UNSUMMARIZED]` only after reading the relevant source and incorporating its evidence; the mere existence of a summary file is insufficient
    - New "reading through our lens" paragraphs exist for any new subsections
    - The overarching perspective table (if present) includes any new dimensions
    - The assessment summary table in section 5 is updated if new papers are closer predecessors than existing ones
@@ -288,15 +271,26 @@ If the project has `paper/references.bib`, offer to append new BibTeX entries th
 
 ---
 
+## PDF Export When Requested
+
+Use ordinary local compilation tools; no conversion skill is required. With Pandoc and XeLaTeX available, run from the review's directory, substituting its actual filename:
+
+```bash
+pandoc "review.md" --from=markdown+tex_math_dollars+raw_tex --pdf-engine=xelatex -V fontsize=12pt -V geometry:margin=1in -V linestretch=1.1 -o "review.pdf"
+```
+
+If Pandoc is unavailable, create an equivalent LaTeX source in a temporary build directory and compile it with `latexmk -xelatex -interaction=nonstopmode -halt-on-error review.tex`. Preserve the text, nested lists, math, tables, and links. Resolve relative source and image paths from the original review's directory.
+
+Use 12pt serif text, comfortable paragraph and list spacing, and a new page for each major section. For Pandoc, put `\newpage` before major sections in the export source and use a temporary LaTeX header via `--include-in-header` when needed for spacing. Keep figures with their explanations and split wide tables. Inspect the resulting PDF using the [PDF guide](../../rules/standalone-pdf.md). Report a missing compiler or failed build rather than claiming a PDF was produced.
+
+---
+
 ## Important
 
-- **Use 4-space indentation for nested lists.** Pandoc (used by `/convert-md-to-pdf`) requires 4-space indentation per nesting level — 2-space nesting gets flattened into a single paragraph. Also add a blank line between a bold header (like `**Buyers**`) and the list that follows it, so pandoc treats them as separate blocks.
-- **Write math for PDF compatibility.** The literature review markdown will likely be converted to PDF via pandoc + XeLaTeX. Three rules prevent rendering failures:
-  - **Multi-symbol expressions must be explicit `$...$` math.** Write `$\mu \to 1$`, not `(μ→1)`. The preprocessor handles isolated Unicode symbols (a standalone `β` or `→`) but breaks on expressions that mix Unicode with text and parentheses.
-  - **Subscripts longer than one character need braces.** Write `$N_{eff}$`, not `N_eff`. Without braces, LaTeX subscripts only the first character (`N_e` + `ff`).
-  - **Isolated Unicode symbols are fine.** A standalone `β` or `δ` in prose will be auto-converted. But if in doubt, use `$\beta$` explicitly — it always works.
+- **Use 4-space indentation for nested lists.** Use 4 spaces per nesting level for reliable Pandoc output. Also add a blank line between a bold header (like `**Buyers**`) and the list that follows it, so pandoc treats them as separate blocks.
+- **Write math for PDF compatibility.** Put mathematical notation in explicit LaTeX math delimiters, including single symbols: `$\beta$`, `$\mu \to 1$`, `$N_{eff}$`. Brace multi-character subscripts. Do not rely on a custom Unicode preprocessor.
 - **Use bullet points and sub-bullets whenever you are listing multiple distinct facts about a single subject** — whether that subject is a paper, a dimension, or a research gap. Each bullet should make one claim or state one fact. This applies to paper descriptions in the dimensions section, formal tools entries, gap discussions, and the key papers index. Reserve prose paragraphs for (a) narrative content (thesis, framework, scope), (b) argumentative positioning (closest predecessors — "here's why this paper differs from ours"), and (c) synthesis paragraphs ("reading through our lens"). The reason: bullet-point structure makes factual content scannable, while positioning arguments read better as connected prose.
-- **All papers get `[UNSUMMARIZED]` and `[UNVERIFIED]` tags by default.** `[UNSUMMARIZED]` is removed only by the `deepen` workflow after reading the summary file and enriching the entry. `[UNVERIFIED]` is removed after citation verification. Neither tag is removed by judgment alone.
+- **Keep tags tied to evidence.** Follow the Tags section: clear `[UNSUMMARIZED]` after reading and incorporating a substantive source, and `[UNVERIFIED]` after checking the citation. Do not remove a tag just because a summary exists.
 - **Do NOT fabricate citations.** If you are unsure about a paper's details (authors, year, journal, title), flag it for the user to verify. Getting a citation wrong is worse than omitting it.
 - **BibTeX fields from memory are unreliable.** Even when a paper is real, LLM-recalled volume, pages, and DOI are often wrong. Mark individual fields you cannot verify with `% UNVERIFIED` comments in the BibTeX entry.
 - **Compare against our paper.** The "Relevance to our paper" field in each entry should be specific: name which of our results the paper relates to, whether it's a predecessor, competitor, complement, or something we extend.

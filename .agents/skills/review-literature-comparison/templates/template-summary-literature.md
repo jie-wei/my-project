@@ -1,5 +1,7 @@
 # Literature Review: [Topic]
 
+<!-- Use Summary links only when those files exist; otherwise link the actual Paper source. Keep [UNSUMMARIZED] until a detailed source has been read and its evidence incorporated. Keep [UNVERIFIED] until citation details are checked. -->
+
 **Date:** [YYYY-MM-DD]
 **Status:** [e.g., "Literature review for paper on X"]
 

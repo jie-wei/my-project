@@ -1,0 +1,146 @@
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{beamerthemeSeminarNotes}[2026/11/18 Pen-and-paper seminar theme]
+
+% Adapted from the supplied Seminar Notes template.
+% Keep Latin Modern serif for all non-heading text.
+% Seminar Pen is reserved for the presentation title and frame headings.
+\newif\ifSNprinttitles
+\DeclareOptionBeamer{printtitles}{\SNprinttitlestrue}
+\ProcessOptionsBeamer
+
+\RequirePackage{iftex}
+\ifPDFTeX
+  \PackageError{SeminarNotes}{Choose XeLaTeX or LuaLaTeX}{This theme uses its bundled OpenType fonts.}
+\fi
+\usefonttheme{professionalfonts}
+\usefonttheme{serif}
+\RequirePackage{fontspec}
+\RequirePackage{unicode-math}
+\RequirePackage{tikz}
+\usetikzlibrary{arrows.meta,calc,positioning}
+\RequirePackage{booktabs}
+\defaultfontfeatures{Ligatures=TeX}
+\setmainfont{lmroman10-regular.otf}[
+  BoldFont=lmroman10-bold.otf,
+  ItalicFont=lmroman10-italic.otf,
+  BoldItalicFont=lmroman10-bolditalic.otf
+]
+\setsansfont{lmroman10-regular.otf}[
+  BoldFont=lmroman10-bold.otf,
+  ItalicFont=lmroman10-italic.otf,
+  BoldItalicFont=lmroman10-bolditalic.otf
+]
+\setmathfont{latinmodern-math.otf}
+\defaultfontfeatures[SeminarPen]{
+  Path=fonts/,Extension=.ttf,UprightFont=*-Regular,BoldFont=*-Semibold,
+  ItalicFont=*-Regular,BoldItalicFont=*-Semibold,Ligatures=TeX,
+  ItalicFeatures={FakeSlant=0.10},BoldItalicFeatures={FakeSlant=0.10}
+}
+\newfontfamily\snhand{SeminarPen}
+\newcommand{\snprint}{\rmfamily}
+
+% All layout and diagram colors can be changed here.
+\definecolor{snPaper}{HTML}{FCFAF4}
+\definecolor{snInk}{HTML}{233649}
+\definecolor{snRed}{HTML}{953B32}
+\definecolor{snMuted}{HTML}{535F67}
+\definecolor{snFaint}{HTML}{C7C4B8}
+\definecolor{snWash}{HTML}{F1DFBA}
+\setbeamercolor{normal text}{fg=snInk,bg=snPaper}
+\setbeamercolor{background canvas}{bg=snPaper}
+\setbeamercolor{structure}{fg=snInk}
+\setbeamercolor{alerted text}{fg=snRed}
+\setbeamercolor{frametitle}{fg=snInk,bg=snPaper}
+\setbeamercolor{title}{fg=snInk}
+\setbeamercolor{itemize item}{fg=snRed}
+\setbeamercolor{block title}{fg=snRed,bg=snPaper}
+\setbeamercolor{block body}{fg=snInk,bg=snPaper}
+\setbeamersize{text margin left=11.5mm,text margin right=11.5mm}
+\setbeamertemplate{navigation symbols}{}
+\setbeamertemplate{headline}{}
+\setbeamerfont{normal text}{family=\rmfamily,size=\fontsize{13}{17.7}}
+\setbeamerfont{frametitle}{family=\snhand,series=\bfseries,size=\fontsize{23}{26}}
+\setbeamerfont{framesubtitle}{family=\snprint,size=\fontsize{11.5}{14.5}}
+\setbeamerfont{title}{family=\snhand,series=\bfseries,size=\fontsize{33}{36}}
+\setbeamerfont{subtitle}{family=\snprint,series=\mdseries,size=\fontsize{12}{15}}
+\ifSNprinttitles
+  \setbeamerfont{frametitle}{family=\snprint,series=\bfseries,size=\fontsize{20}{23.5}}
+  \setbeamerfont{title}{family=\snprint,series=\bfseries,size=\fontsize{29}{32}}
+\fi
+\setbeamertemplate{itemize item}{\raise.15ex\hbox{\color{snRed}\rule{.55em}{.7pt}}}
+\setbeamertemplate{itemize subitem}{\raise.2ex\hbox{\color{snMuted}\rule{.35em}{.55pt}}}
+\setbeamertemplate{enumerate item}{\snprint\color{snRed}\insertenumlabel.}
+\AtBeginDocument{\usebeamerfont{normal text}}
+
+\setbeamertemplate{frametitle}{%
+  \nointerlineskip\vskip5.2mm%
+  {\usebeamerfont{frametitle}\usebeamercolor[fg]{frametitle}\raggedright\strut\insertframetitle\par}%
+  \ifx\insertframesubtitle\@empty\else
+    {\usebeamerfont{framesubtitle}\color{snMuted}\insertframesubtitle\par}%
+  \fi\vskip2.0mm%
+}
+\setbeamertemplate{footline}{%
+  \hbox to\paperwidth{\hfill{\snprint\fontsize{9}{10}\selectfont\color{snMuted}\insertframenumber}\hskip6mm}%
+  \vskip2.6mm%
+}
+
+\newcommand{\pennote}[1]{{\snprint\bfseries\color{snRed}#1}}
+\newcommand{\printtext}[1]{{\snprint #1}}
+% A short pen underline. It takes its width from the text, including math.
+\DeclareRobustCommand{\penunderline}[1]{%
+  \tikz[baseline=(word.base)]{%
+    \node[inner sep=0pt,outer sep=0pt,anchor=base] (word) {#1};
+    \coordinate (left) at ([xshift=-.03em,yshift=-.13em]word.south west);
+    \coordinate (right) at ([xshift=.03em,yshift=-.10em]word.south east);
+    \draw[snRed,line width=.70pt,line cap=round]
+      (left) .. controls ($(left)!.26!(right)+(0,-.04em)$) and
+      ($(left)!.72!(right)+(0,.065em)$) .. (right);
+  }%
+}
+% Add a title illustration with \titlesketch{...}; omit it for a full-width title.
+\newcommand{\sncoverart}{}
+\newcommand{\titlesketch}[1]{\renewcommand{\sncoverart}{#1}}
+\newcommand{\sntitletext}{%
+  {\usebeamerfont{title}\raggedright\inserttitle\par}%
+  \ifx\insertsubtitle\@empty\else
+    \vskip5.0mm{\usebeamerfont{subtitle}\color{snMuted}\insertsubtitle\par}%
+  \fi
+}
+\setbeamertemplate{title page}{%
+  \vbox to .77\paperheight{%
+    \vfill
+    \ifx\sncoverart\@empty
+      \begin{minipage}{.96\linewidth}\sntitletext\end{minipage}%
+    \else
+      \begin{minipage}[c]{.57\linewidth}\sntitletext\end{minipage}\hfill
+      \begin{minipage}[c]{.385\linewidth}\centering\sncoverart\end{minipage}%
+    \fi
+    \vfill
+    {\snprint\fontsize{10.5}{13}\selectfont
+      \ifx\insertauthor\@empty\else{\bfseries\insertauthor}\fi
+      \ifx\insertinstitute\@empty\else\enspace\textcolor{snFaint}{/}\enspace\insertinstitute\fi
+      \ifx\insertdate\@empty\else\enspace\textcolor{snFaint}{/}\enspace\insertdate\fi\par}%
+  }%
+}
+
+% One flat, paper-like treatment for standard Beamer blocks and theorems.
+\setbeamertemplate{block begin}{%
+  \par\vskip.35em
+  {\snprint\bfseries\color{snRed}\fontsize{13.3}{16}\selectfont\insertblocktitle\par}%
+  \nobreak\vskip.25em\begin{minipage}{\linewidth}\raggedright
+}
+\setbeamertemplate{block end}{\end{minipage}\par\vskip.35em}
+\tikzset{
+  sn line/.style={draw=snInk,line width=.85pt,line cap=round,line join=round},
+  sn arrow/.style={sn line,-{Stealth[length=2.1mm,width=1.5mm]}},
+  sn redline/.style={draw=snRed,line width=.9pt,line cap=round,line join=round},
+  sn pointer/.style={sn redline,-{Stealth[length=1.9mm,width=1.4mm]}},
+  sn guide/.style={draw=snMuted,line width=.45pt,dash pattern=on 1.4pt off 2pt},
+  sn write/.style={font=\snprint\fontsize{12.5}{15.5}\selectfont,text=snInk,inner sep=1.5pt},
+  sn note/.style={font=\snprint\bfseries\fontsize{12.5}{15.5}\selectfont,text=snRed,inner sep=1.5pt},
+  sn caption/.style={font=\snprint\fontsize{10.5}{13}\selectfont,text=snMuted,inner sep=1.5pt}
+}
+\pdfstringdefDisableCommands{%
+  \def\penunderline#1{#1}\def\pennote#1{#1}\def\printtext#1{#1}%
+}
+\endinput

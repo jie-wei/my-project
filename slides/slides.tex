@@ -1,0 +1,37 @@
+% !TeX program = xelatex
+\documentclass[12pt,aspectratio=169]{beamer}
+
+% Seminar Notes styling with handwritten headings and Latin Modern body text.
+\usepackage{mathtools,amssymb}
+\usetheme{SeminarNotes}
+\usepackage[authoryear,round]{natbib}
+% The references frame supplies its own heading.
+\renewcommand{\bibsection}{}
+\setbeamertemplate{navigation symbols}{}
+
+% Generated figures stay in output/. Add assets/ only for slide-specific art.
+\graphicspath{{../output/core/figures/}{assets/}}
+
+\title[Short title]{Paper Title}
+\author[Author name]{Author Name}
+\institute[]{Institution}
+\date{\today}
+
+\begin{document}
+
+\begin{frame}[plain]
+    \titlepage
+\end{frame}
+
+% Replace this example and add frames to suit the audience and research stage.
+% Keep the deck in this file until splitting it serves a concrete purpose.
+% Copy optional equation, result, figure, column, or timing frames from layouts.tex.
+\begin{frame}{Research question}
+    \begin{itemize}
+        \item State the question in one sentence.
+        \medskip
+        \item Explain why the answer matters.
+    \end{itemize}
+\end{frame}
+
+\end{document}

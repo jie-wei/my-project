@@ -8,15 +8,9 @@ Steps 2–9 for auditing a theory summary's mathematical correctness.
 
 ## Step 2: Read the Source Math Formulations
 
-The source material typically lives in `docs/{tier}/{variant_name}/` and follows the structure produced by `/solve-econ-as-math`. Read files in this order:
+Start with the user's current question, agreed notation, and maintained assumptions. Read the relevant source notes or supplied discussion. Files such as `question.md`, `definitions.md`, `assumptions.md`, `findings.md`, `results/`, and earlier reviews can help when available. A particular notes structure is not required.
 
-1. **`question.md`** — The model, question, and verification conditions. This is your reference for what the summary should be proving.
-2. **`definitions.md`** and **`assumptions.md`** (if present) — Shared vocabulary and assumptions in force. Check the summary's notation against these.
-3. **`findings.md`** — The guided walkthrough, dependency tree, and result index with statuses. This is the primary source of truth for what was proved and what remains open.
-4. **`results/` directory** — Individual result files with IF/THEN/BECAUSE/FAILS WHEN structure. Read these for detailed proofs.
-5. **Any `reviews/` files** — Past review reports flagging known issues.
-
-If the source material doesn't follow this structure, read all `.md` files and reconstruct the picture yourself.
+Check whether each earlier result still applies to the current model. Treat superseded formulations as historical context. Source notes and result-status labels are evidence to verify, and an unresolved conflict affecting the claim should be identified explicitly.
 
 Build an independent understanding of:
 - What is the question?
@@ -24,17 +18,19 @@ Build an independent understanding of:
 - What is the logical dependency tree?
 - What are the key mathematical objects and their properties?
 
-**Do NOT read the summary yet.** Form your own view first, then compare. This prevents anchoring.
+When separate sources are available, form an independent view before assessing the summary. When the supplied proof is the only source, check its premises and reasoning directly.
 
 ---
 
-## Step 3: (No separate inventory step — the source notes are the ground truth.)
+## Step 3: Check Source Status
+
+Distinguish current assumptions, established results, conjectures, and superseded claims. Verify these labels against the actual arguments.
 
 ---
 
 ## Step 4: Read the Summary
 
-Read the theory summary end-to-end. For each lemma, theorem, and proof step, note:
+Read the requested note or proof end-to-end. For each mathematical claim and included proof step, note:
 - What is claimed (the formal statement)
 - What is the proof strategy
 - What assumptions are used
@@ -47,13 +43,20 @@ Work **top-down**: start by asking "is the main conclusion even true?" and try t
 
 **First pass — challenge the conclusion:**
 - Assume the theorem is wrong. What would a counterexample look like?
-- Try to construct one. If you can't, that's evidence the theorem is correct — but now you know *where* the proof needs to be airtight.
+- Try to construct one. Failure to find a counterexample does not establish the theorem. Identify which claims still require proof.
 - If you can construct one, the proof has a gap. Find it.
 
 **Second pass — check each step:**
 - Does the conclusion actually follow from the premises?
 - Are there implicit assumptions that are not stated?
 - Is the proof complete, or does it only handle the "generic" case and miss boundaries?
+
+**Check the proof's layers:**
+- Does the opening strategy explain why the few major steps jointly imply the conclusion, rather than merely naming steps?
+- Do the top-level bullets state those steps and their roles, with the reasons, calculations, and cases nested beneath the step they support?
+- Does each lower-level argument establish its parent claim without circular dependence? Can the reader follow the strategy before reading the details?
+
+A missing justification is a proof gap. Correct reasoning presented as a crowded or flat list is an exposition issue; distinguish these in the report.
 
 **Boundary and degenerate cases:**
 - What happens at the extremes of parameter ranges?
@@ -82,7 +85,7 @@ Work **top-down**: start by asking "is the main conclusion even true?" and try t
 - Does the summary accurately represent what was proved in the notes?
 - Are any results marked as "superseded" in the notes but presented as active in the summary? (Note: the summary may intentionally correct or update the notes — flag the discrepancy but don't assume the notes are right.)
 - Does the summary's logical flow match the dependency tree from the source notes?
-- Are there results in the source notes that the summary omits without explanation?
+- Does the note omit a result or qualification needed for its stated purpose or included claims? Results outside the requested scope need not be included.
 - **Critically: do the source results themselves contain errors?** If you find a bug in a source `.md` result file, report it — this is the most valuable kind of catch.
 
 ---
@@ -91,7 +94,7 @@ Work **top-down**: start by asking "is the main conclusion even true?" and try t
 
 - Are all symbols defined before use?
 - Is notation consistent throughout (same symbol for the same object)?
-- **Notation policy:** the project convention is to use model primitives directly rather than shorthand, unless notation has been explicitly registered. Do NOT flag verbose primitives as a problem. Instead, if you notice a recurring expression that would genuinely benefit from shorthand, **suggest** the notation to the user as a MINOR item — they can approve it and register it as project notation.
+- Follow the shared notation policy. Preserve established symbols and model primitives. Suggest optional shorthand when useful, and do not treat an expanded primitive expression as a defect.
 
 ---
 
@@ -139,20 +142,4 @@ Work **top-down**: start by asking "is the main conclusion even true?" and try t
 - [Whether the "what is established vs. open" section is accurate]
 ```
 
-**Structured output block** (for orchestrator):
-
-```
---- REVIEW RESULT ---
-STATUS: CLEAN | ISSUES_FOUND
-MODE: THEORY
-TARGET: [path to summary]
-CRITICAL: [N]
-MAJOR: [N]
-MINOR: [N]
-OVERALL: [1-5]
---- END REVIEW RESULT ---
-```
-
-Scoring: 5 = all proofs correct, no issues, 4 = minor notation/clarity issues only, 3 = one major issue (missing boundary case, incomplete argument), 2 = critical gap in a proof, 1 = fundamental logical error.
-
-**Action thresholds:** Score <= 3 means the summary should not be used until issues are fixed. Score <= 2 means the underlying source results may also need re-examination.
+When a proof gap invalidates a claim, recheck the underlying source result and identify which conclusions depend on it.

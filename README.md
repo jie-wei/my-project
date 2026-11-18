@@ -1,112 +1,21 @@
 # Economics Research Project Template
 
-A project template for economics research with Claude Code integration. Includes a plan-first workflow, quality gates with scoring rubrics, automated verification, and session logging.
-
-**Built on [pedrohcgs/claude-code-my-workflow](https://github.com/pedrohcgs/claude-code-my-workflow)** — adapted from Pedro H.C. Sant'Anna's Claude Code workflow template for economics research.
-
-## Project Structure
-
-```
-my-project/
-├── code/
-│   ├── pyproject.toml               # Dependencies + makes src/ installable
-│   ├── src/mypackage/               # Pure logic (no file I/O)
-│   │   ├── __init__.py
-│   │   ├── config.py                # All file paths, one place
-│   │   ├── core/                    # Production logic
-│   │   ├── exploration/             # Experimental logic
-│   │   └── archive/                 # Retired experiments
-│   ├── scripts/
-│   │   ├── core/                    # Numbered pipeline scripts (01_clean.py, 02_merge.py, …)
-│   │   ├── exploration/             # Notebooks, ad-hoc analysis
-│   │   └── archive/                 # Retired scripts
-│   └── tests/                       # Tests for src/ logic
-│
-├── data/
-│   ├── raw/                         # Sacred — never modify
-│   ├── intermediate/                # Rebuilt by scripts
-│   ├── processed/                   # Rebuilt by scripts
-│   └── codebook.md                  # Variable descriptions
-│
-├── docs/
-│   ├── core/                        # Analysis notes (promoted)
-│   ├── exploration/                 # Analysis notes (experimental)
-│   ├── archive/                     # Retired notes
-│   ├── preambles/                   # LaTeX preamble files
-│   ├── templates/                   # Reusable markdown templates
-│   │   ├── session-log.md
-│   │   ├── quality-report.md
-│   │   ├── requirements-spec.md
-│   │   ├── exploration-readme.md
-│   │   └── archive-readme.md
-│   └── quality_reports/
-│       ├── plans/                   # Saved plans (survive compaction)
-│       ├── session_logs/            # Per-session work logs
-│       ├── merges/                  # Quality reports at merge time
-│       ├── specs/                   # Requirements specifications
-│       └── reviews/                 # Review reports (replaced on re-run)
-│           ├── core/
-│           ├── exploration/
-│           └── archive/
-│
-├── output/
-│   ├── core/
-│   │   ├── tables/                  # .tex + .csv per variant
-│   │   └── figures/                 # .pdf + .png per variant
-│   ├── exploration/
-│   │   ├── tables/
-│   │   └── figures/
-│   └── archive/
-│       ├── tables/
-│       └── figures/
-│
-├── paper/
-│   ├── main.tex                     # Preamble + \subfile{...} chain
-│   ├── sections/                    # Section subfiles (01-introduction.tex, …)
-│   ├── appendices/                  # Appendix subfiles (A-proofs.tex, …)
-│   ├── .latexmkrc                   # latexmk config (aux dir, cleanup)
-│   └── references.bib               # Bibliography
-│
-├── .agents/
-│   └── skills/                      # Shared workflow skills (Claude Code + Codex)
-│       ├── write-code/              #   /write-code — implement Python code
-│       ├── write-summary/           #   /write-summary — write LaTeX summary from outputs
-│       ├── review-code/             #   /review-code — Python code review
-│       ├── review-summary/          #   /review-summary — fact-check summary against data
-│       ├── review-manuscript/       #   /review-manuscript — referee-quality paper review
-│       ├── review-details/          #   /review-details — grammar/typos check
-│       ├── analyze-data/            #   /analyze-data — data analysis
-│       └── commit/                  #   /commit — stage, commit, PR, merge
-│
-├── .claude/
-│   ├── agents/                      # Subagent prompts (orchestrator)
-│   ├── rules/                       # Behavioral rules (auto-loaded)
-│   ├── hooks/                       # Automation hooks
-│   └── skills -> ../.agents/skills/  # Claude discovery link
-│
-├── CLAUDE.md                        # Claude Code entry point
-└── .gitignore
-```
+An economics research starter with a LaTeX paper and slides, a Python package, and shared research skills for Claude Code and Codex. Adapted from Pedro H.C. Sant’Anna’s [Claude Code workflow](https://github.com/pedrohcgs/claude-code-my-workflow).
 
 ## Setup
 
-Skills live in `.agents/skills/` and are shared by Claude Code and Codex. Edit them there; `.claude/skills` is a relative symlink to the same folder. When copying this template locally, include hidden folders and preserve symlinks (for example, `cp -a my-project my-new-project`). Each copy then uses its own skills. Codex invocation settings live in each skill’s `agents/openai.yaml`.
-
-1. **Clone and rename:**
+1. Clone the template into a new project on a filesystem that supports symlinks.
 
    ```bash
-   git clone <this-repo-url> my-new-project
+   git clone -c core.symlinks=true <this-repo-url> my-new-project
+   cd my-new-project
    ```
 
-2. **Rename the package** — replace `mypackage` in three places:
-   - Folder: `code/src/mypackage/` → `code/src/yourpackage/`
-   - `code/pyproject.toml`: change `name = "mypackage"`
-   - All imports: `from mypackage.config import ...` → `from yourpackage.config import ...`
+   Shared rules and skills live in `.agents/rules/` and `.agents/skills/`. Claude Code reaches them through the relative symlinks `.claude/rules` and `.claude/skills`. For a local copy, use `cp -a` from a checkout where both links resolve.
 
-3. **Install [uv](https://docs.astral.sh/uv/)** and dependencies:
+2. For Python work, use [uv](https://docs.astral.sh/uv/) to install the package and development dependencies.
 
    ```bash
-   curl -LsSf https://astral.sh/uv/install.sh | sh
    cd code
    uv venv --python 3.12
    source .venv/bin/activate
@@ -114,204 +23,42 @@ Skills live in `.agents/skills/` and are shared by Claude Code and Codex. Edit t
    python -c "import mypackage; print('OK')"
    ```
 
-4. **Customize** for your project:
-   - `.claude/rules/workflow-start.md` — non-negotiables (seed convention, figure standards)
-   - `.claude/rules/standalone-quality.md` — tolerance thresholds for your domain
+   To rename `mypackage`, update `code/src/mypackage/`, the project name in `code/pyproject.toml`, and the corresponding Python imports.
 
-5. **Start Claude Code** — open the panel in VS Code (or run `claude` in terminal), then paste:
+## Project layout
 
-   > I am starting to work on **[PROJECT NAME]** in this repo. **[Describe your project in 2–3 sentences — what you're building, what data you're using, what methods you plan to apply.]**
-   >
-   > I want our collaboration to be structured and rigorous. The Claude Code workflow is already configured in this repo. Please read CLAUDE.md and the rules in .claude/rules/, understand the workflow, and then **update all configuration files to fit my project** — fill in placeholders in workflow-start.md (non-negotiables, preferences) and standalone-quality.md (tolerance thresholds).
-   >
-   > After that, use the plan-first workflow for all non-trivial tasks. Once I approve a plan, switch to contractor mode — coordinate everything autonomously and only come back to me when there's ambiguity or a decision to make.
-   >
-   > Enter plan mode and start by adapting the workflow configuration for this project.
+| Location | Purpose |
+| --- | --- |
+| `paper/` | Manuscript, section and appendix subfiles, and bibliography. The [paper index](paper/paper-structure.md) describes each file. |
+| `slides/` | A Beamer starter with its own build configuration. See the [slides guide](slides/README.md). |
+| `docs/core/`, `docs/exploration/`, `docs/archive/` | Research notes and write-ups. A named exploration holds the assumptions, results, and summary for one variant. |
+| `docs/literature/` | Papers and literature notes. |
+| `docs/templates/` | LaTeX journal files and reusable exploration, archive, and domain-review templates. |
+| `docs/quality_reports/reviews/` | Findings from code and summary reviews, organized by tier. |
+| `code/src/mypackage/` | Research functions and reusable helpers. `config.py` provides base paths and `output_path`. |
+| `code/scripts/` and `code/tests/` | Pipeline entry points and numbered production scripts, plus tests using synthetic data and temporary files. |
+| `data/` | Original data in `raw/`, rebuilt datasets in `intermediate/` and `processed/`, and variable definitions in `codebook.md`. |
+| `output/` | Generated figures and tables used by the paper, slides, and empirical summaries. |
+| `AGENTS.md`, `CLAUDE.md` | Shared project instructions and Claude Code’s import of those instructions. |
+| `.agents/` | Shared rules, skills, and hook code. Edit these source files directly. |
+| `.claude/`, `.codex/` | Client-specific settings, hook registration, and links to shared files. |
 
-   **What this does:** Claude reads all configuration files, fills in your project-specific preferences, then enters contractor mode — planning before acting, verifying after, scoring against quality gates.
+## Research workflows
 
-## Workflow
+Start an exploration in a named folder such as `docs/exploration/wage_posting/`. Create the code and output folders it uses. The researcher decides when to promote or archive the work. See the [exploration rules](.agents/rules/workflow-exploration.md).
 
-### Master Routing
+`write-summary` turns existing theory discussions or empirical outputs into LaTeX notes, equation sheets, figure notes, or full reports, sized to the request. `review-summary` checks proofs against the source notes or numerical claims against the pipeline outputs. The [shared skills directory](.agents/skills/) also includes literature reviews, manuscript reviews, and code tools. Each skill’s `agents/openai.yaml` controls its Codex invocation settings.
 
-Every instruction is routed based on its nature:
+The [file I/O guide](.agents/rules/standalone-file-io.md) defines data locations, output paths, and how scripts and reusable readers or writers fit together. Both agents reach it through `AGENTS.md` and the relevant skills. From `code/` in the project environment, run `python -m pytest tests/test_config.py` to check project roots and output paths.
 
-```
-Your instruction
-    │
-    ├─ Exploration? ────────────── EXPLORATION FAST-TRACK
-    │  (new idea to test)            60/100, no planning
-    │                                → see "Exploration Workflow"
-    │
-    ├─ Trivial production? ──────── JUST DO IT
-    │  (typo, one-line fix)          verify → score (80/100) → done
-    │
-    └─ Non-trivial production? ──── PLAN-FIRST WORKFLOW
-       (multi-file, unclear)         → see "Production Workflow"
-```
+For manuscript work, build from `paper/`. With the starter’s empty bibliography, run `latexmk -xelatex -bibtex- main.tex`. Once you add citations, use `latexmk -xelatex main.tex`. Rebuild an edited section or appendix after the full paper so its standalone PDF picks up current labels. See the [LaTeX build instructions](.agents/rules/standalone-latex-compile.md).
 
-### Production Workflow (Plan → Orchestrate → Verify)
+For presentations, build from `slides/` with `latexmk -xelatex slides.tex`. The deck reuses project figures, tables, and bibliography entries. See the [slides guide](slides/README.md) for paths and editing conventions.
 
-```
-NON-TRIVIAL INSTRUCTION
-    │
-    ▼
-PLAN-FIRST WORKFLOW
-    1. Enter plan mode
-    2. Requirements spec (if ambiguous — ask user)
-    3. Draft plan → save to docs/quality_reports/plans/
-    4. Present to user → wait for approval
-    │
-    ▼
-ORCHESTRATOR (selected by file type)
-    │
-    ├── Scripts (code/scripts/) → Simplified loop
-    │   IMPLEMENT → VERIFY → SCORE (>= 80?)
-    │                                YES → done
-    │                                NO  → fix → re-verify
-    │
-    └── Everything else → Full loop
-        IMPLEMENT → VERIFY → REVIEW → FIX → RE-VERIFY → SCORE
-                                                           │
-                                                     >= 80? → done
-                                                      < 80  → loop (max 5)
-```
+Codex reads [AGENTS.md](AGENTS.md). [CLAUDE.md](CLAUDE.md) imports the same instructions for Claude Code. `AGENTS.md` tells both agents to read project memory at session start and when to consult the detailed guides.
 
-Rules: `workflow-plan.md`, `protocol-orchestrator.md`. Agent: `orchestrator.md`
+`research-brainstorm` and `research-ideate` support theory, empirics, and mixed work. They keep discussion in chat unless a saved note is requested. `commit` creates a local commit by default; pushing, opening a PR, and merging follow the user's requested scope.
 
-### Exploration Workflow (Fast-Track → Decide)
+Invoke shared skills with `/write-summary` in Claude Code or `$write-summary` in Codex. After setup, start a fresh Claude Code session and use `/context all` to check the loaded project instructions and `/` to see the skill commands.
 
-The project uses a **three-tier structure** across four layers: `core/` (production), `exploration/` (active experiments), and `archive/` (retired). Transitions are just swapping the tier name.
-
-```
-User: "Let's explore [idea]"
-    │
-    ▼
-┌─ RESEARCH VALUE CHECK
-│  Worth investigating?  NO → Stop.  YES ↓
-│
-├─ PICK A NAME (short, descriptive, snake_case)
-│  e.g., "iv_approach", "bootstrap_se", "did_event_study"
-│
-├─ CREATE NAMED SUBFOLDER across needed layers:
-│  code/src/mypackage/exploration/[name]/
-│  code/scripts/exploration/[name]/
-│  output/exploration/[name]/
-│  docs/exploration/[name]/
-│
-├─ CODE IMMEDIATELY (60/100 threshold, no plan mode)
-│  ✓ Must: code runs, results correct, goal in session log
-│  ✗ Skip: tests, type hints, docstrings, script numbering
-│
-├─ LOG PROGRESS (session log)
-│
-▼
-┌─ DECISION POINT (user decides, never Claude) ────┐
-│                                                   │
-├─ PROMOTE                 ├─ KEEP          ├─ ARCHIVE
-│  exploration/[name]/     │  Stay in       │  exploration/[name]/
-│    → core/[name]/        │  exploration/  │    → archive/[name]/
-│  Graduate checklist:     │                │  with brief note
-│  □ Quality >= 80         │                │
-│  □ Tests added & pass    │                │
-│  □ Follows conventions   │                │
-│  □ Documented            │                │
-└──────────────────────────┴────────────────┘
-```
-
-**Promotion re-enters the production workflow:** when the user decides to promote, the promoted code goes through the full plan-first → orchestrator pipeline at the 80/100 threshold.
-
-Rules: `workflow-exploration.md`
-
-## Conventions
-
-### Code Organization
-
-| Location | Purpose | Rule |
-|----------|---------|------|
-| `code/src/mypackage/core/` | Pure logic | No file I/O, no hardcoded paths |
-| `code/scripts/core/` | Pipeline scripts | File I/O, numbered in order |
-| `code/tests/` | Tests | Test src/ logic with fake data |
-| `code/src/mypackage/config.py` | Paths | All file paths defined here |
-
-**Litmus test:** Needs the file system? → `scripts/`. No? → `src/`.
-
-### Data Flow
-
-`data/raw/` → scripts → `data/intermediate/` → scripts → `data/processed/` → scripts → `output/{tier}/`
-
-`output/{tier}/` feeds two consumers:
-- `paper/` imports figures and tables directly (via `\graphicspath` and `\input{}`)
-- `/write-summary` reads results and produces summary docs in `docs/{tier}/`
-
-Raw data is sacred — never modify.
-
-### Quality Gates
-
-| Score | Gate | Meaning |
-|-------|------|---------|
-| 60 | Exploration | Good enough to keep exploring |
-| 80 | Commit | Good enough to save (production) |
-| 90 | PR | Ready for review |
-| 95 | Excellence | Aspirational |
-
-Scoring rubrics are defined per file type in `.claude/rules/standalone-quality.md`.
-
-## Automation
-
-### Session Logging
-
-**Session logging** runs throughout all workflow paths:
-- **Post-plan**: goal, approach, key context
-- **Incremental**: 1-3 lines on decisions, problems, corrections
-- **End-of-session**: summary, scores, open questions
-
-The `reminder-log` hook auto-creates one session log per Claude Code session. Naming: `YYYY-MM-DD_HHMMSS_{hash}_description.md`.
-
-### Context Survival & Session Lifecycle
-
-Hooks fire automatically throughout a session to maintain continuity:
-
-```
-SESSION START
-    │
-    ├─ reminder-log creates session log stub
-    │
-    ▼
-DURING WORK (hooks fire on every tool use)
-    │
-    ├─ reminder-verify ─── after .py/.tex edit → "run/compile to verify"
-    ├─ files-protection ── blocks edits to references.bib, settings.json
-    ├─ reminder-log ────── blocks if 15+ responses without session log update
-    │
-    ▼
-APPROACHING CONTEXT LIMIT
-    │
-    ├─ auto-compression happens
-    └─ Resume: read plan + git log + state current task
-```
-
-### Rules Reference
-
-| Rule | Purpose |
-|------|---------|
-| `workflow-start.md` | Routing, quality gates, non-negotiables |
-| `workflow-plan.md` | Planning protocol, requirements specs |
-| `workflow-exploration.md` | Exploration fast-track, promotion, archiving |
-| `protocol-orchestrator.md` | Post-plan execution loop, file-type routing to skills |
-| `protocol-verification.md` | How to verify each file type |
-| `standalone-conventions.md` | Code organization, data flow, three-tier structure, math-in-chat |
-| `standalone-latex-compile.md` | LaTeX compile workflow (latexmk modes, subfiles, aux cleanup, log diagnostics) |
-| `standalone-quality.md` | Scoring rubrics by file type |
-| `standalone-log-session.md` | When to update session logs |
-| `standalone-pdf.md` | Safe PDF reading workflow (chunked, size-checked) |
-| `orchestrator.md` (agent) | Orchestrator agent — executes the protocol-orchestrator loop |
-
-### Hooks Reference
-
-| Hook | Trigger | Action |
-|------|---------|--------|
-| `reminder-verify.py` | PostToolUse (Write/Edit) | Reminds to run/compile .py/.tex |
-| `reminder-log.py` | Stop | Blocks if 15+ responses without log update |
-| `files-protection.py` | PreToolUse (Edit/Write) | Blocks edits to references.bib, settings.json |
-| `reminder-notify.py` | Notification | Desktop notifications |
+Both clients use the same [file-protection hook](.agents/hooks/files-protection.py) for files named `references.bib` or `settings.json`. It checks Claude Code’s `Edit` and `Write` tools and Codex’s `apply_patch` tool. In a new clone, accept Claude Code’s workspace trust prompt on first launch. In Codex, open the trusted project and use `/hooks` to review and trust the [project hook](.codex/hooks.json). Desktop notifications are configured in [Claude Code’s settings](.claude/settings.json).

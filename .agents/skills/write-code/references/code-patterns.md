@@ -2,61 +2,15 @@
 
 ## Config.py
 
-All paths live in `code/src/mypackage/config.py`. Never hardcode paths in scripts or modules.
+Read the [file I/O guide](../../../rules/standalone-file-io.md) for locations and the path construction example. Import base directories and `output_path(tier, kind, variant)` from [config.py](../../../../code/src/mypackage/config.py), then compose ordinary filenames in the caller.
 
-### Existing general paths
-
-These are already defined — don't duplicate or modify them:
-
-```python
-from pathlib import Path
-
-def _find_root():
-    p = Path(__file__).resolve()
-    while p != p.parent:
-        if (p / ".git").exists():
-            return p
-        p = p.parent
-    raise FileNotFoundError("Could not find project root")
-
-ROOT = _find_root()
-
-RAW = ROOT / "data" / "raw"
-INTERMEDIATE = ROOT / "data" / "intermediate"
-PROCESSED = ROOT / "data" / "processed"
-TABLES = ROOT / "output" / "core" / "tables"
-FIGURES = ROOT / "output" / "core" / "figures"
-EXPLORATION_OUTPUT = ROOT / "output" / "exploration"
-```
-
-### Adding variant-specific paths
-
-Extend config.py by adding new constants below the existing ones:
-
-```python
-# {variant_name} paths
-PROCESSED_{VARIANT_NAME} = ROOT / "data" / "processed" / "{variant_name}"
-TABLES_{VARIANT_NAME} = ROOT / "output" / "{tier}" / "tables" / "{variant_name}"
-FIGURES_{VARIANT_NAME} = ROOT / "output" / "{tier}" / "figures" / "{variant_name}"
-```
-
-**Naming convention:** `{CATEGORY}_{VARIANT_NAME}` in ALL_CAPS_SNAKE_CASE.
-
-Examples:
-- `PROCESSED_IV_APPROACH = ROOT / "data" / "processed" / "iv_approach"`
-- `TABLES_IV_APPROACH = ROOT / "output" / "exploration" / "tables" / "iv_approach"`
-- `FIGURES_IV_APPROACH = ROOT / "output" / "exploration" / "figures" / "iv_approach"`
-
-Rules:
-- Use simple `Path` joins (`/` operator) — no string formatting or f-strings
-- One constant per path — don't build paths dynamically at import time
-- Group related constants together with a comment header
+Existing project-specific constants can be reused. Keep their locations in sync when moving a variant between tiers.
 
 ---
 
 ## src/ Module Pattern
 
-Functions in `code/src/mypackage/` are pure logic — no file system interaction.
+Research calculations accept data and return results. Reusable readers and writers may live in clearly named I/O modules and accept explicit paths.
 
 ```python
 """Short description of what this module does."""
@@ -93,7 +47,7 @@ def winsorize(series: pd.Series, lower: float = 0.01, upper: float = 0.99) -> pd
 ```
 
 Key rules:
-- No `open()`, no `Path()`, no `print()`, no `plt.show()`
+- Keep calculation functions independent of file access and display.
 - Type hints on all public functions
 - Docstrings with Args/Returns on public functions
 - Seed passed as parameter, not set globally: `def bootstrap(data, n=1000, seed=42)`
@@ -118,12 +72,16 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 
-from mypackage.config import RAW, PROCESSED_{VARIANT_NAME}, TABLES_{VARIANT_NAME}, FIGURES_{VARIANT_NAME}
+from mypackage.config import RAW, output_path
 from mypackage.{tier}.{variant_name}.module import function_name
 
 # -- Parameters ---------------------------------------------------------------
 SEED = 42
 np.random.seed(SEED)
+TIER = "exploration"
+VARIANT = "example_variant"
+tables_dir = output_path(TIER, "tables", VARIANT)
+figures_dir = output_path(TIER, "figures", VARIANT)
 
 # -- Data Loading --------------------------------------------------------------
 df = pd.read_csv(RAW / "dataset.csv")
@@ -132,12 +90,12 @@ df = pd.read_csv(RAW / "dataset.csv")
 result = function_name(df)
 
 # -- Save Outputs --------------------------------------------------------------
-TABLES_{VARIANT_NAME}.mkdir(parents=True, exist_ok=True)
-FIGURES_{VARIANT_NAME}.mkdir(parents=True, exist_ok=True)
+tables_dir.mkdir(parents=True, exist_ok=True)
+figures_dir.mkdir(parents=True, exist_ok=True)
 
 # Tables: .tex + .csv
-result.to_csv(TABLES_{VARIANT_NAME} / "summary.csv", index=False)
-# For .tex tables, see regression-rpy2.md or use df.to_latex()
+result.to_csv(tables_dir / "summary.csv", index=False)
+result.to_latex(tables_dir / "summary.tex", index=False)
 
 # Figures: .pdf + .png
 fig, ax = plt.subplots(figsize=(8, 5))
@@ -145,7 +103,7 @@ ax.plot(result["x"], result["y"])
 ax.set_xlabel("X variable")
 ax.set_ylabel("Y variable")
 for ext in (".pdf", ".png"):
-    fig.savefig(FIGURES_{VARIANT_NAME} / f"main_plot{ext}", dpi=300, bbox_inches="tight")
+    fig.savefig(figures_dir / f"main_plot{ext}", dpi=300, bbox_inches="tight")
 plt.close(fig)
 ```
 
@@ -162,7 +120,7 @@ Key rules:
 
 ## Test Pattern
 
-Tests live in `code/tests/` and test only src/ functions.
+Tests live in `code/tests/`. Use synthetic data for calculations and pytest's `tmp_path` for I/O tests. See [test_config.py](../../../../code/tests/test_config.py) for filesystem examples.
 
 ```python
 import pytest
@@ -207,7 +165,7 @@ Key rules:
 - Use `pytest.fixture` for shared test data
 - Class-based grouping by function
 - `pytest.approx()` for all float comparisons
-- Fake data only — never load real files
+- Use synthetic data, including synthetic files in temporary directories for I/O checks.
 - Test edge cases: empty, single row, missing values, boundary conditions
 - Test reproducibility if function involves randomness
 - Run with: `cd code && uv run pytest tests/test_{variant_name}.py -v`

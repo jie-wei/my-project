@@ -1,5 +1,8 @@
 % Summary Document Template
 % Fill in PLACEHOLDERs and uncomment templates as needed.
+% Full-report example: keep only the sections needed for the requested note.
+% One main idea per paragraph. Keep visible spacing and separate pages for
+% major sections, including when a short note contains distinct sections.
 % Writing order: Methodology -> Results -> Discussion -> Conclusion -> Appendices -> Introduction (last)
 
 \documentclass[12pt]{article}
@@ -17,7 +20,11 @@
 \usepackage{hyperref}
 \usepackage{xcolor}
 \usepackage{enumitem}
+\setlist{leftmargin=*, itemsep=0.5em, topsep=0.5em, parsep=0.3em}
+\setlist[itemize,2]{itemsep=0.35em, topsep=0.35em}
+\setlist[enumerate,2]{itemsep=0.35em, topsep=0.35em}
 \usepackage{setspace}
+\setstretch{1.1}
 
 % --- Page Layout ---
 \usepackage[margin=1in]{geometry}
@@ -44,9 +51,8 @@
 % Compute: 3 levels up to project root, then into output/{tier}
 \newcommand{\outdir}{PLACEHOLDER}
 
-% --- Common Math Shortcuts (add as needed) ---
-\newcommand{\E}{\mathbb{E}}
-\newcommand{\R}{\mathbb{R}}
+% --- Established project notation (add only what the note uses) ---
+% \newcommand{...}{...}
 
 \begin{document}
 
@@ -79,6 +85,7 @@ PLACEHOLDER: Authors
 
 
 %-----------------------------------------------------%
+\clearpage
 \section{Methodology}\label{sec:method}
 %-----------------------------------------------------%
 
@@ -96,11 +103,15 @@ PLACEHOLDER: Authors
 
 
 %-----------------------------------------------------%
+\clearpage
 \section{Results}\label{sec:results}
 %-----------------------------------------------------%
 
 % One subsection per logical group of outputs.
-% For each table/figure: include it, write a caption, write 1-3 paragraphs of interpretation.
+% For each table/figure, include a caption and the interpretation needed for
+% the request. A clear caption can suffice; there is no paragraph quota.
+% Give each additional point its own paragraph. Keep figures non-floating,
+% together with their explanations, never isolated on a page.
 % Cross-reference related results with \ref{}.
 
 % PLACEHOLDER
@@ -165,6 +176,7 @@ PLACEHOLDER: Authors
 
 
 %-----------------------------------------------------%
+\clearpage
 \section{Discussion}\label{sec:discussion}
 %-----------------------------------------------------%
 
@@ -177,6 +189,7 @@ PLACEHOLDER: Authors
 
 
 %-----------------------------------------------------%
+\clearpage
 \section{Conclusion}\label{sec:conclusion}
 %-----------------------------------------------------%
 
@@ -190,6 +203,7 @@ PLACEHOLDER: Authors
 \appendix
 %-----------------------------------------------------%
 
+\clearpage
 \section{Detailed Methodology}\label{app:methodology}
 
 % Step-by-step pipeline walkthrough.
@@ -203,6 +217,7 @@ PLACEHOLDER: Authors
 % PLACEHOLDER
 
 
+\clearpage
 \section{Additional Results}\label{app:additional}
 
 % Robustness checks, variant comparisons, additional figures.

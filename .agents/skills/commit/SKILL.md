@@ -1,93 +1,60 @@
 ---
 name: commit
-description: Stage, commit, create PR, and merge to main. Use for the standard commit-PR-merge cycle.
+description: Commit the requested changes. Push, open a pull request, or merge only when the user's request includes those actions.
 disable-model-invocation: true
-argument-hint: "[optional: commit message]"
+argument-hint: "[optional commit message or requested Git actions]"
 allowed-tools: ["Bash", "Read", "Glob", "Write"]
 ---
 
-# Commit, PR, and Merge
+# Commit Requested Changes
 
-Stage changes, commit with a descriptive message, create a PR, and merge to main.
+Match the Git operations to the user's request and any authorization already established in the conversation.
 
-## Steps
+## Determine the Scope
 
-1. **Check current state:**
+| Request | Actions |
+| --- | --- |
+| `/commit`, with or without a commit message | Stage the requested changes and create a local commit, then stop. |
+| Commit and push | Commit, then push the intended branch. |
+| Open a pull request | Prepare any necessary commit, push the branch, and open the PR; leave it unmerged. |
+| Merge an identified PR | Check and merge that PR; do not create another branch, commit, or PR unless needed and requested. |
+| Commit, open a PR, and merge | Complete that sequence within the requested scope. |
 
-```bash
-git status
-git diff --stat
-git log --oneline -5
-```
+A commit message is content, not an instruction to perform additional Git actions. Honor explicit requests to use an existing commit or branch.
 
-2. **Create a branch** from the current state:
+Do not request confirmation again for actions already authorized. Ask only when the intended changes, repository, branch, or PR cannot be determined safely from context.
 
-```bash
-git checkout -b <short-descriptive-branch-name>
-```
+## Prepare and Commit
 
-3. **Stage files** — add specific files (never use `git add -A`):
+1. **Inspect the working tree and index.**
 
-```bash
-git add <file1> <file2> ...
-```
+   ```bash
+   git status --short
+   git diff --stat
+   git diff --cached
+   git log --oneline -5
+   ```
 
-Do NOT stage `.claude/settings.local.json` or any files containing secrets.
+   Identify the changes belonging to the request. Preserve unrelated work, including pre-existing staged changes; do not include it in the commit without authorization. Use selective staging for files containing both requested and unrelated edits, and an isolated index when needed to preserve unrelated staging.
 
-4. **Commit** with a descriptive message:
+2. **Choose the branch.** Reuse the appropriate existing feature branch. If committing from the repository's default branch, create a descriptive feature branch unless the user requested otherwise. Determine the actual default branch rather than assuming it is named `main`.
 
-If `$ARGUMENTS` is provided, use it as the commit message. Otherwise, analyze the staged changes and write a message that explains *why*, not just *what*.
+3. **Stage the intended paths or hunks.** Use specific paths, never a blanket `git add -A`. Exclude local settings and secrets. Inspect the staged diff to confirm the commit contains only the intended changes, and check the relevant verification results.
 
-```bash
-git commit -m "$(cat <<'EOF'
-<commit message here>
-EOF
-)"
-```
+4. **Commit.** Use a supplied commit message exactly. Otherwise, write a concise message explaining the change and its purpose. Write multiline text to a temporary file and use `git commit -F <message-file>`; keep user text out of shell interpolation.
 
-5. **Push and create PR:**
+For a commit-only request, report the commit hash, branch, and what changed. The workflow ends here.
 
-```bash
-git push -u origin <branch-name>
-gh pr create --title "<short title>" --body "$(cat <<'EOF'
-## Summary
-<1-3 bullet points>
+## Push or Open a PR When Requested
 
-## Test plan
-<checklist>
+Push the intended branch to its appropriate remote when the request includes pushing or opening a PR. Do not force-push unless explicitly requested.
 
-🤖 Generated with [Claude Code](https://claude.com/claude-code)
-EOF
-)"
-```
+Reuse an existing PR for the branch when appropriate. For a new PR, describe the concrete problem, resulting behavior, and relevant validation. Write the body to a temporary file and pass it with `gh pr create --body-file <body-file>`. Attribute the work accurately; do not add a hard-coded client signature.
 
-6. **Merge and clean up:**
+Report the PR URL when a PR is requested. Opening a PR does not imply merging it.
 
-```bash
-gh pr merge <pr-number> --merge --delete-branch
-git checkout main
-git pull
-```
+## Merge When Requested
 
-7. **Generate quality report** — use `docs/templates/quality-report.md` as the format:
+Confirm the intended PR and target branch, review the diff and required check status, then merge using the repository's permitted method. Prefer a merge commit when no other method is requested or required. Do not bypass required checks.
 
-- Review all files that were changed in this branch (use `git diff --stat HEAD~1` or the PR diff)
-- Score each file against the rubrics in `.claude/rules/standalone-quality.md` (start at 100, deduct)
-- Fill in the verification checklist
-- Save to `docs/quality_reports/merges/YYYY-MM-DD_[branch-name].md`
-- Stage and commit the report directly to main:
-
-```bash
-git add docs/quality_reports/merges/<report-file>.md
-git commit -m "add quality report for <branch-name>"
-git push
-```
-
-8. **Report** the PR URL, what was merged, and the quality scores.
-
-## Important
-
-- Always create a NEW branch — never commit directly to main
-- Exclude `settings.local.json` and sensitive files from staging
-- Use `--merge` (not `--squash` or `--rebase`) unless asked otherwise
-- If the commit message from `$ARGUMENTS` is provided, use it exactly
+Report the merged PR and result. Delete branches or switch the local checkout only when that cleanup is requested or already authorized.

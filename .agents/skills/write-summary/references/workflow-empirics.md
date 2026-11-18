@@ -1,15 +1,15 @@
 # Workflow: Empirics Summary
 
-Steps 2–7 for producing a LaTeX summary from pipeline outputs (tables, figures).
+Steps 2–7 for producing an empirical note or full report from pipeline outputs. Apply the relevant parts to the scope selected in Step 1.
 
 ---
 
 ## Step 2: Read the Code Pipeline
 
-Understanding the methodology is essential for writing the Methodology section and the Appendix.
+Read enough of the relevant pipeline to establish what the selected results measure and how they were produced. A full report may need a methodology section and appendix. A brief figure note may need only the source, sample, units, and qualifications in its captions.
 
 - List scripts in `code/scripts/{tier}/{variant_name}/` (exploration/archive) or numbered scripts in `code/scripts/{tier}/` (core)
-- Read each script: what data it loads, what transformations it applies, what it outputs
+- Read the scripts producing the selected outputs and their dependencies: what data they load, what transformations they apply, and what they output
 - Read relevant src modules in `code/src/mypackage/{tier}/{variant_name}/` for the pure logic
 - Note which script produces which output file (for appendix cross-references)
 - Extract mathematical operations that should become LaTeX equations
@@ -18,9 +18,9 @@ Also check `docs/{tier}/{variant_name}/` for any analysis notes the user may hav
 
 ---
 
-## Step 3: Scan & Read All Outputs
+## Step 3: Read the Outputs in Scope
 
-Go through every output file:
+Read the outputs needed for the requested note or report, including evidence that qualifies or contradicts an included claim:
 
 **Tables** (`output/{tier}/tables/{variant_name}/`):
 - Read `.csv` files to understand the data (column names, values, sample sizes)
@@ -29,13 +29,13 @@ Go through every output file:
 **Figures** (`output/{tier}/figures/{variant_name}/`):
 - View `.png` files to understand distributions, trends, comparisons
 
-For each output, write a short internal summary of what it shows. This inventory drives the Results section.
+Identify what each selected output shows and the qualifications needed to interpret it. Use this to choose captions and any results discussion.
 
 ---
 
 ## Step 4: Identify Connections Across Results
 
-After reading all outputs, look for:
+Where the requested document combines results, look for:
 - Results that explain or qualify each other
 - Patterns recurring across multiple tables/figures
 - Results that contradict or complicate each other
@@ -47,8 +47,8 @@ This cross-result analysis informs the Discussion and the Introduction.
 
 ## Step 5: Brainstorm Explanations & Conjectures
 
-Think like an empirical economist:
-- Propose 2-4 possible economic explanations for the key findings. What mechanisms could generate these patterns?
+When interpretation is part of the request, consider plausible economic mechanisms and distinguish them from demonstrated findings. A figure extract need not add a conjectures section.
+- What economic mechanisms could generate the key patterns?
 - For each conjecture: (a) which results support it, (b) which complicate or contradict it, (c) what additional analysis or data would help distinguish between competing explanations
 - Flag which conjectures are well-supported vs speculative
 - Consider alternative interpretations: compositional artifact? Selection effect? Mechanical consequence of the methodology?
@@ -57,7 +57,7 @@ Think like an empirical economist:
 
 **From coefficient to mechanism:**
 - "The positive coefficient on X suggests that [mechanism], possibly because [channel]."
-- Generate 2-3 candidate explanations for each key finding
+- Consider competing explanations where the evidence permits them
 - Prefer mechanisms that are specific and falsifiable over vague ones
 
 **Testing conjectures against data:**
@@ -89,13 +89,15 @@ The goal is to turn the summary from a report ("here's what we found") into a re
 
 ## Step 6: Read the Template
 
-Read `references/template-latex-empirics.tex` for the document structure and preamble.
+Read `references/template-latex-empirics.tex` for the preamble and a full-report example. Retain the sections needed by the requested document.
 
 ---
 
 ## Step 7: Write the Summary (body first, introduction last)
 
-The writing order matters because the introduction must reference findings from later sections.
+The phases below describe a full report. For a brief note, use only the relevant parts. A figure note can consist of the selected figures, captions, and essential context. If an introduction is useful, write it after the findings it previews.
+
+Use one main idea per paragraph and visible spacing. Begin each major section on a fresh page; a brief note can still have separate pages for distinct topics. Keep each figure with its caption and explanation. Add interpretation only where needed, without a fixed paragraph quota.
 
 **Phase A — Methodology (main body, brief):**
 - High-level overview: data sources, key methodological choices, estimation strategy
@@ -106,7 +108,7 @@ The writing order matters because the introduction must reference findings from 
 For each table or figure:
 - Include via `\input{\outdir/tables/{variant_name}/{filename}}` or `\includegraphics[width=0.9\textwidth]{\outdir/figures/{variant_name}/{filename}.png}`
 - Write a caption with descriptive text and a `\label{}`
-- Write 1-3 paragraphs of interpretive prose: what the numbers mean, what patterns emerge, how they relate to other results
+- Add the interpretation needed for the requested scope. For a brief extract, a clear caption may be sufficient. For a report, explain patterns and connections in the text.
 - Cross-reference related tables/figures via `\ref{}`
 
 Where appropriate, create hand-coded summary tables that synthesize across multiple outputs.
@@ -140,14 +142,16 @@ Where appropriate, create hand-coded summary tables that synthesize across multi
 ### Assemble
 
 - Compute `\outdir` relative path: from `docs/{tier}/{variant_name}/` to `output/{tier}/` = `../../../output/{tier}`
-- Fill in the template preamble, then assemble sections in document order: Introduction, Methodology, Results, Discussion, Conclusion, Appendices
+- Fill in the preamble and assemble the selected material. For a full report, a useful order is Introduction, Methodology, Results, Discussion, Conclusion, and any needed Appendices.
 
 ### Checklist
 
-- [ ] All output files referenced (no orphaned tables/figures)
+Apply the items relevant to the requested scope. Verify every included claim even in a brief note.
+
+- [ ] Requested results included, with evidence needed to qualify their interpretation
 - [ ] `\outdir` relative path is correct
-- [ ] Every table has caption, label, and interpretive prose
-- [ ] Every figure has caption, label, and interpretive prose
+- [ ] Each included table or figure has a label and enough caption or prose context to interpret it
+- [ ] One main idea per paragraph, readable spacing, and separate pages for major sections; figures remain with their explanations
 - [ ] Cross-references (`\ref{}`) link related results
 - [ ] Connections across results are discussed
 - [ ] Economic conjectures presented with supporting/contradicting evidence
@@ -156,4 +160,4 @@ Where appropriate, create hand-coded summary tables that synthesize across multi
 - [ ] Introduction written last, reflects actual findings
 - [ ] Document compiles without errors
 - [ ] Auxiliary files cleaned up
-- [ ] `/review-summary` passes (all numbers verified, no missing figures)
+- [ ] Included claims verified using Step 10 of `SKILL.md`, with figure references checked

@@ -10,13 +10,14 @@
 \usepackage{mathtools}
 \usepackage{natbib}
 \usepackage{graphicx}
-\graphicspath{{../output/core/figures/}}
 \usepackage{color}
 \usepackage{xcolor}
 \usepackage{fancyhdr}
 \usepackage[useregional]{datetime2}
 \usepackage[noabbrev]{cleveref}
 \usepackage{subfiles}
+% Define this after subfiles so standalone sections resolve the same figures.
+\graphicspath{{../output/core/figures/}}
 
 \allowdisplaybreaks[4]
 

@@ -2,15 +2,18 @@
 % For pure math explorations without data pipelines.
 % Goal: self-contained document that a reader with fresh eyes can follow.
 %
-% Architecture (house style — see workflow-theory.md "House style" for the whys):
+% Full walkthrough example; retain only the sections the requested note needs.
+% See workflow-theory.md "Proof-writing guidance" for the reasoning conventions.
+% Layout and proof structure:
 %   - Setup holds PRIMITIVES ONLY (bulleted) + the maintained assumption.
 %     Every other object is defined at the top of the section that first uses it.
-%   - Each results section: definitions (first use) -> motivation prose ->
-%     theorem with FULL inline hypotheses -> strategy paragraph (per-lemma
-%     roles) -> assembly proof (forward-citing lemmas) -> shared inputs as
-%     numbered displays -> lemmas with bulleted proofs.
-%   - One point per line: proofs are itemize/enumerate, one move per bullet.
-%   - Key identities as align* chains with && justifications per line.
+%   - State a result's hypotheses and explain why its major proof steps suffice.
+%   - Top-level bullets give the major steps and their roles. Nested bullets
+%     justify them with assumptions, calculations, supporting results, and cases.
+%   - Separate lemmas are optional. When useful, show their roles in the main
+%     proof before presenting their statements and layered proofs.
+%   - One main idea per paragraph or bullet, with visible spacing.
+%   - Put justified align* chains under the steps they establish.
 %   - Explicit summation bounds everywhere; argument-explicit functions in
 %     statements; registered notation in statements, raw algebra in proofs.
 %   - \clearpage before each section after the first; figures non-floating,
@@ -26,15 +29,18 @@
 \usepackage{hyperref}
 \usepackage{xcolor}
 \usepackage{enumitem}
-\setlist{noitemsep, topsep=2pt}
+\setlist{leftmargin=*, itemsep=0.5em, topsep=0.5em, parsep=0.3em}
+\setlist[itemize,2]{itemsep=0.35em, topsep=0.35em}
+\setlist[enumerate,2]{itemsep=0.35em, topsep=0.35em}
 \usepackage{setspace}
+\setstretch{1.1}
 \usepackage{tikz}   % figures: draw inline, non-floating
 \usepackage{float}
 
 % --- Page Layout ---
 \usepackage[margin=1in]{geometry}
 \setlength{\parindent}{0pt}
-\setlength{\parskip}{0.55em}
+\setlength{\parskip}{0.8em}
 
 % --- Section Formatting ---
 \usepackage{titlesec}
@@ -54,6 +60,8 @@
 \newtheorem{lemma}[theorem]{Lemma}
 \newtheorem{corollary}[theorem]{Corollary}
 \newtheorem{definition}[theorem]{Definition}
+\newtheorem{assumption}[theorem]{Assumption}
+\newtheorem{conjecture}[theorem]{Conjecture}
 \theoremstyle{remark}
 \newtheorem{remark}[theorem]{Remark}
 
@@ -73,10 +81,13 @@
 Internal Report \hspace{1em}|\hspace{1em} \today
 \end{center}
 
-% --- Plan paragraph: the steps of the document, one sentence each ---
-\textbf{Plan.} PLACEHOLDER: one method/idea, then the ordered list of results
-(1) ... (2) ... Everything below is proved; the honest boundary is one closing
-remark.
+% --- Opening overview: separate the question, answer/status, and route ---
+\textbf{Question.} PLACEHOLDER: the question addressed by this note.
+
+\textbf{Answer and status.} PLACEHOLDER: distinguish what is proved, maintained
+as an assumption, or still conjectural. Do not claim that every result is proved.
+
+\textbf{Route.} PLACEHOLDER: the major results and how they answer the question.
 
 %-----------------------------------------------------%
 \section{Setup}
@@ -105,11 +116,8 @@ actually used globally).
 \section{Step 1: PLACEHOLDER first result}
 %-----------------------------------------------------%
 
-% 1. Definitions this section needs (first use), argument-explicit:
-PLACEHOLDER: The object bounded is ...
-\[
-\Pi(\pi) \;\equiv\; \dots
-\]
+% 1. Definitions this section needs, using established notation at first use:
+PLACEHOLDER: the object studied and the definitions needed for this result.
 
 % 2. Motivation prose (economics, in words — no bullets here):
 PLACEHOLDER: why this result should hold, in words.
@@ -120,17 +128,28 @@ PLACEHOLDER: one-sentence statement; hypotheses inline; conclusion in
 registered notation.
 \end{theorem}
 
-% 4-5. Proof, bulleted; key identity as an align chain:
+% 4. Explain sufficiency, not just the names of the steps.
+\textbf{Proof strategy.} PLACEHOLDER: explain why the conclusions of the two
+major steps below jointly establish the theorem.
+
+% 5. Major steps at the top level; reasons and computations below each step.
 \begin{proof}
+\leavevmode\par
 \begin{itemize}
-  \item \emph{PLACEHOLDER first move.}
-    \begin{align*}
-    X &= \dots && \text{the definition}\\
-      &= \dots && \text{insert \eqref{eq:placeholder}}\\
-      &= \dots && \text{the key regrouping, named in words}
-    \end{align*}
-  \item PLACEHOLDER next move, with its reason.
-  \item PLACEHOLDER conclusion. \qedhere
+  \item \textbf{PLACEHOLDER: first major step and what it achieves.}
+    \begin{itemize}
+      \item PLACEHOLDER: the applicable assumption or supporting result.
+      \item PLACEHOLDER: the calculation establishing this step.
+        \begin{align*}
+        X &= \dots && \text{the definition}\\
+          &= \dots && \text{the justified transformation}
+        \end{align*}
+    \end{itemize}
+  \item \textbf{PLACEHOLDER: second major step and its role in the conclusion.}
+    \begin{itemize}
+      \item PLACEHOLDER: why the previous step applies here.
+      \item PLACEHOLDER: how the two steps imply the full claim. \qedhere
+    \end{itemize}
 \end{itemize}
 \end{proof}
 
@@ -149,22 +168,35 @@ registered notation.
 PLACEHOLDER.
 \end{theorem}
 
-% 4. Strategy paragraph: name the parts, one clause per lemma's role
-%    (bulleted if 3+), flag the crux and where each key assumption enters.
+% 4. Explain why the steps jointly imply the claim and where assumptions enter.
+\textbf{Proof strategy.} PLACEHOLDER: why the conclusions supplied by
+Lemmas~\ref{lem:a} and~\ref{lem:b} are jointly sufficient for the theorem.
 
-% 5. Assembly proof FIRST (forward-cites the lemmas; exhaustive case list,
-%    each case with its own correct reason). May start on a fresh page:
+% 5. Assembly proof FIRST when separate lemmas are useful. Otherwise justify
+%    the steps directly in nested bullets. May start on a fresh page:
 % \clearpage
 \begin{proof}[Proof of Theorem~\ref{thm:main}]
+\leavevmode\par
 \begin{itemize}
-  \item PLACEHOLDER case, directly.
-  \item PLACEHOLDER case: Lemma~\ref{lem:a}.
-  \item PLACEHOLDER case: Lemma~\ref{lem:b}. \qedhere
+  \item \textbf{PLACEHOLDER: first major step and its role.}
+    \begin{itemize}
+      \item PLACEHOLDER: check the hypotheses of Lemma~\ref{lem:a}.
+      \item PLACEHOLDER: state precisely what that lemma establishes here.
+    \end{itemize}
+  \item \textbf{PLACEHOLDER: second major step and completion.}
+    \begin{itemize}
+      \item PLACEHOLDER: check the hypotheses of Lemma~\ref{lem:b}.
+      \item PLACEHOLDER: combine its conclusion with the first step. \qedhere
+    \end{itemize}
 \end{itemize}
 \end{proof}
 
-% 6. Shared inputs as numbered displays (never buried in one lemma's proof):
-It remains to prove the lemmas. PLACEHOLDER shared input:
+% 6. Supporting details form a separate readable block.
+\clearpage
+\subsection*{Supporting lemmas}
+
+% Shared inputs as numbered displays, before the lemmas that use them:
+PLACEHOLDER: shared input and the conditions under which it holds.
 \begin{equation}\label{eq:placeholder}
 \dots
 \end{equation}
@@ -176,10 +208,20 @@ PLACEHOLDER: full inline hypotheses,
 \]
 \end{lemma}
 
+\textbf{Proof strategy.} PLACEHOLDER: why the following steps establish the lemma.
+
 \begin{proof}
+\leavevmode\par
 \begin{itemize}
-  \item PLACEHOLDER, by \eqref{eq:placeholder}.
-  \item PLACEHOLDER. \qedhere
+  \item \textbf{PLACEHOLDER: major reduction.}
+    \begin{itemize}
+      \item PLACEHOLDER: justify applying \eqref{eq:placeholder}.
+      \item PLACEHOLDER: the resulting implication.
+    \end{itemize}
+  \item \textbf{PLACEHOLDER: complete the argument.}
+    \begin{itemize}
+      \item PLACEHOLDER: why the remaining conditions give the claim. \qedhere
+    \end{itemize}
 \end{itemize}
 \end{proof}
 
@@ -187,19 +229,31 @@ PLACEHOLDER: full inline hypotheses,
 PLACEHOLDER: full inline hypotheses and conclusion.
 \end{lemma}
 
+\textbf{Proof strategy.} PLACEHOLDER: why these cases exhaust the claim's domain.
+
 \begin{proof}
+\leavevmode\par
 \begin{itemize}
-  \item PLACEHOLDER, by \eqref{eq:placeholder}.
-  \item PLACEHOLDER. \qedhere
+  \item \textbf{PLACEHOLDER: establish the claim in each case.}
+    \begin{itemize}
+      \item PLACEHOLDER: the condition separating the cases.
+        \begin{itemize}
+          \item PLACEHOLDER: first case and its reason.
+          \item PLACEHOLDER: boundary case and its reason.
+        \end{itemize}
+      \item PLACEHOLDER: why these cases jointly establish the claim. \qedhere
+    \end{itemize}
 \end{itemize}
 \end{proof}
 
 %-----------------------------------------------------%
 \clearpage
-\section*{Closing remark: the honest boundary}
+\section*{Status and remaining questions}
 %-----------------------------------------------------%
 
-PLACEHOLDER: what is distribution-free vs. specialized; what remains open
-(\textcolor{red}{in red}); the maintained assumption restated in one clause.
+PLACEHOLDER: the scope of the proved results and their maintained assumptions.
+
+PLACEHOLDER: unresolved claims or conjectures, with the specific missing
+argument identified. Keep their status visible where they first appear too.
 
 \end{document}

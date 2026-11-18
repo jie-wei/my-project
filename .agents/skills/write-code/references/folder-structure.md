@@ -4,7 +4,7 @@ This project uses a three-tier structure (core / exploration / archive) mirrored
 
 ## Code Layers
 
-### src/ — pure logic
+### src/ — research functions and reusable helpers
 
 ```
 code/src/mypackage/{tier}/{variant_name}/
@@ -15,7 +15,7 @@ code/src/mypackage/{tier}/{variant_name}/
 
 - Create `__init__.py` in every new package directory (even if empty)
 - One module per logical unit (e.g., `cleaning.py`, `estimation.py`, `formatting.py`)
-- No I/O — functions take data in, return data out
+- Calculations take data in and return results. Reusable readers and writers receive explicit paths and may live in a clearly named module such as `mypackage/io.py`.
 
 ### scripts/ — I/O glue
 
@@ -45,31 +45,11 @@ code/tests/test_{variant_name}.py
 ```
 
 - One test file per variant
-- Test only src/ functions — scripts are verified by running them
+- Test research functions with synthetic data. Test I/O behavior with temporary files under `tmp_path` and run affected scripts.
 
-## Data Layers
+## Data and outputs
 
-```
-data/
-├── raw/                           # Sacred — never modify
-├── intermediate/                  # Shared across variants (commonly used cleaned data)
-└── processed/{variant_name}/      # Variant-specific processed data
-```
-
-- `raw/` is read-only. Scripts read from it but never write to it.
-- `intermediate/` holds data that multiple variants share (e.g., a cleaned panel used by several analyses).
-- `processed/{variant_name}/` holds data specific to one variant's pipeline.
-
-## Output Layers
-
-```
-output/{tier}/
-├── tables/{variant_name}/    # .tex and .csv files
-└── figures/{variant_name}/   # .pdf and .png files
-```
-
-- Tables: `.tex` files directly importable with `\input{}` in LaTeX, plus `.csv` for quick inspection
-- Figures: `.pdf` for LaTeX inclusion, `.png` for quick viewing. Save with `dpi=300, bbox_inches='tight'`
+Read the [file I/O guide](../../../rules/standalone-file-io.md) for the shared directory map and path construction example.
 
 ## Documentation (optional)
 
@@ -85,7 +65,7 @@ docs/{tier}/{variant_name}/
 Check what already exists:
 
 1. **Glob for existing folders**: `code/src/mypackage/{tier}/`, `code/scripts/{tier}/`
-2. **Read config.py**: check if paths for this variant are already registered
-3. **Create only what's missing** — don't recreate existing directories or duplicate config paths
+2. Read `config.py` for base directories and `output_path(tier, kind, variant)`. Reuse any project-specific paths already present.
+3. Create only the directories this task uses.
 
 Use `os.makedirs(..., exist_ok=True)` in scripts to create output directories at runtime.

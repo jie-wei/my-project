@@ -44,10 +44,10 @@ Search for related skills to avoid duplication:
 
 ```bash
 # Check project skills
-ls .claude/skills/ 2>/dev/null
+ls .agents/skills/ 2>/dev/null
 
 # Search for keywords
-grep -r -i "KEYWORD" .claude/skills/ 2>/dev/null
+rg -n -i "KEYWORD" .agents/skills/
 ```
 
 **Outcomes:**
@@ -57,9 +57,9 @@ grep -r -i "KEYWORD" .claude/skills/ 2>/dev/null
 
 ### PHASE 3: Create Skill
 
-Create the skill file at `.claude/skills/[skill-name]/SKILL.md`:
+Create the skill file at `.agents/skills/[skill-name]/SKILL.md`:
 
-```yaml
+````markdown
 ---
 name: descriptive-kebab-case-name
 description: |
@@ -94,7 +94,18 @@ allowed-tools: ["Read", "Grep", "Glob", "Write"]
 
 ## References
 [Documentation links, related files, or prior discussions]
+````
+
+For the explicit-only scaffold above, also create `.agents/skills/[skill-name]/agents/openai.yaml`:
+
+```yaml
+policy:
+  allow_implicit_invocation: false
 ```
+
+These two settings express the same choice: Claude uses `disable-model-invocation: true`, while Codex uses `policy.allow_implicit_invocation: false`. Both clients still discover the shared skill for explicit invocation.
+
+When updating an existing skill, preserve its invocation mode and unrelated metadata. If the user requests automatic selection, set Claude's `disable-model-invocation` to `false` and Codex's `allow_implicit_invocation` to `true`. Keep the pair consistent; do not regenerate an existing metadata file in a way that discards its other fields.
 
 ### PHASE 4: Quality Gates
 
@@ -106,13 +117,15 @@ Before finalizing, verify:
 - [ ] Content is general enough to be reusable
 - [ ] No sensitive information (credentials, personal data)
 - [ ] Skill name is descriptive and uses kebab-case
+- [ ] Claude's frontmatter and Codex's `agents/openai.yaml` express the same invocation mode; existing unrelated metadata is preserved
 
 ## Output
 
 After creating the skill, report:
 
 ```
-Skill created: .claude/skills/[name]/SKILL.md
+Skill created: .agents/skills/[name]/
+  Invocation: [explicit-only or automatic, consistent across both clients]
   Trigger: [when to use]
   Problem: [what it solves]
 ```
@@ -121,7 +134,7 @@ Skill created: .claude/skills/[name]/SKILL.md
 
 User discovers that pandas silently coerces types when merging:
 
-```markdown
+````markdown
 ---
 name: pandas-merge-type-coercion
 description: |
@@ -169,7 +182,7 @@ remain integer (or Int64) after merge.
 ## References
 - pandas documentation on nullable integer types
 - [LEARN:python] entry in MEMORY.md if applicable
-```
+````
 
 ---
 
@@ -177,5 +190,5 @@ remain integer (or Int64) after merge.
 
 - **Trigger conditions are critical.** Vague descriptions like "handle data issues" won't match future situations. Be specific: exact error messages, symptoms, scenarios.
 - **Test before saving.** Only document solutions that actually work.
-- **Check conventions.** Is this skill GENERIC (helps all users) or SPECIFIC (personal workflow)? Generic skills go in `.claude/skills/`. Specific workflows go in `.claude/state/personal-memory.md`. See `standalone-conventions.md` → "Generic vs Specific".
+- **Choose the right destination.** Reusable workflows go in `.agents/skills/`; project-specific corrections go in `MEMORY.md`. Machine-specific or private local notes go in `.claude/state/personal-memory.md`. `AGENTS.md` tells both clients to read these memory files at session start. Do not create a skill for a correction that only needs a short memory entry.
 - **Update MEMORY.md** with a `[LEARN:skills]` entry noting the new skill was created.

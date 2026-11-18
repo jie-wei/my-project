@@ -1,0 +1,58 @@
+% Copy any complete frame into slides.tex, above \end{document}.
+
+% Display equation
+\begin{frame}{[Slide heading]}
+  [Introduce the notation.]
+  \[
+    \text{[Equation]}
+  \]
+  [Interpret the equation.]
+\end{frame}
+
+% Result and proof idea
+\begin{frame}{[Slide heading]}
+  \begin{block}{Proposition}
+    [State the result and its conditions.]
+  \end{block}
+  \medskip
+  \pennote{Proof idea.}\quad [Give the main step.]
+\end{frame}
+
+% Figure
+\begin{frame}{[Slide heading]}
+  \begin{center}
+    % Replace this box with the command on the next commented line.
+    % \includegraphics[width=.90\linewidth,height=.54\textheight,keepaspectratio]{figure.pdf}
+    \fbox{\parbox[c][2.6cm][c]{.76\linewidth}{\centering\color{snMuted}[Figure]}}
+  \end{center}
+  [Figure caption.]
+\end{frame}
+
+% Two columns
+\begin{frame}{[Slide heading]}
+  \begin{columns}[T,onlytextwidth]
+    \begin{column}{.47\textwidth}
+      \textbf{[Left heading]}\par\smallskip
+      [Left content.]
+    \end{column}
+    \begin{column}{.47\textwidth}
+      \textbf{[Right heading]}\par\smallskip
+      [Right content.]
+    \end{column}
+  \end{columns}
+\end{frame}
+
+% Timing of the model
+\begin{frame}{[Slide heading]}
+  \begin{center}
+    \begin{tikzpicture}
+      \draw[sn arrow] (0,0) -- (11,0);
+      \foreach \location/\event in
+        {1.25/{[First event]},5.35/{[Second event]},9.45/{[Third event]}} {
+        \fill[snInk] (\location,0) circle (2pt);
+        \node[sn write,above=3mm,align=center,text width=3.3cm]
+          at (\location,0) {\event};
+      }
+    \end{tikzpicture}
+  \end{center}
+\end{frame}
